@@ -1,0 +1,50 @@
+{
+  "name": "signalk-ajrm-marine-traffic",
+  "version": "0.5.0",
+  "description": "AIS and traffic decision engine for the AJRM Marine Suite.",
+  "main": "plugin/index.js",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\" && node --check plugin/index.js && node --check public/app.js && node --check scripts/replay-capture.js",
+    "replay:capture": "node scripts/replay-capture.js"
+  },
+  "keywords": [
+    "signalk-node-server-plugin",
+    "signalk-webapp",
+    "signalk-category-ais",
+    "ais",
+    "cpa",
+    "traffic-core",
+    "notifications",
+    "signal-k",
+    "signalk",
+    "ajrm-marine-suite",
+    "marine",
+    "navigation"
+  ],
+  "author": "Anthony McDonald, with assistance from William McAusland",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic/issues"
+  },
+  "homepage": "https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "plugin",
+    "public",
+    "scripts",
+    "README.md",
+    "LICENSE",
+    "docs"
+  ],
+  "signalk-plugin-enabled-by-default": false,
+  "signalk": {
+    "displayName": "AJRM Marine Traffic",
+    "appIcon": "./icon.svg"
+  }
+}

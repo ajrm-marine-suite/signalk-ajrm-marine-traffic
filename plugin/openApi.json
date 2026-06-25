@@ -1,0 +1,96 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AJRM Marine Traffic Core API",
+    "version": "0.5.0",
+    "description": "Authoritative Traffic Core capability, target, Auto Profile, Audio Policy, and command projections."
+  },
+  "servers": [
+    {
+      "url": "/plugins/signalk-ajrm-marine-traffic"
+    }
+  ],
+  "paths": {
+    "/status": {
+      "get": {
+        "summary": "Get Traffic Core capability, target and policy projections",
+        "responses": {
+          "200": {
+            "description": "Current Traffic Core capability, target, and policy state"
+          }
+        }
+      }
+    },
+    "/commands": {
+      "get": {
+        "summary": "Get Traffic Core command capability and runtime state",
+        "responses": {
+          "200": {
+            "description": "Current command state"
+          }
+        }
+      }
+    },
+    "/commands/profile": {
+      "put": {
+        "summary": "Select the authoritative Traffic Core profile",
+        "responses": {
+          "200": {
+            "description": "Profile selected"
+          }
+        }
+      }
+    },
+    "/commands/profiles": {
+      "get": {
+        "summary": "Get Traffic Core profile sensitivity settings",
+        "responses": {
+          "200": {
+            "description": "Current per-profile sensitivity settings"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update Traffic Core profile sensitivity settings",
+        "responses": {
+          "200": {
+            "description": "Profile sensitivity settings saved"
+          }
+        }
+      }
+    },
+    "/commands/targets/{identity}/silence": {
+      "post": {
+        "summary": "Silence or unsilence one Traffic Core target",
+        "parameters": [
+          {
+            "name": "identity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Target silence state changed"
+          },
+          "404": {
+            "description": "Target not found"
+          }
+        }
+      }
+    },
+    "/commands/unsilence-all": {
+      "post": {
+        "summary": "Clear all runtime target silence state",
+        "responses": {
+          "200": {
+            "description": "Targets unsilenced"
+          }
+        }
+      }
+    }
+  }
+}

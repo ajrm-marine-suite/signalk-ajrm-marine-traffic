@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AJRM Marine Traffic</title>
+    <link rel="stylesheet" href="./styles.css?v=0.8.9" />
+    <script defer src="./app.js?v=0.8.9"></script>
+  </head>
+  <body>
+    <header>
+      <div>
+        <p class="eyebrow">Administration and diagnostics</p>
+        <h1>AJRM Marine Traffic</h1>
+      </div>
+      <button id="refresh" type="button">Refresh</button>
+    </header>
+    <div id="status" class="status warning">Connecting…</div>
+    <main>
+      <section>
+        <h2>Health</h2>
+        <div id="health" class="metrics"></div>
+      </section>
+      <section>
+        <h2>Runtime controls</h2>
+        <div class="controls">
+          <label>Profile
+            <select id="profile" disabled>
+              <option value="anchor">Anchored</option>
+              <option value="harbor">Harbour</option>
+              <option value="coastal">Coastal</option>
+              <option value="offshore">Offshore</option>
+            </select>
+          </label>
+          <button id="unsilenceAll" type="button" disabled>Unsilence all</button>
+        </div>
+        <p id="commandStatus" class="muted">Runtime changes need Signal K write access.</p>
+      </section>
+      <section>
+        <h2>Auto Profile</h2>
+        <div class="controls">
+          <label><input id="autoProfileEnabled" type="checkbox" disabled /> Enable Auto Profile Switch</label>
+          <label>Outside profile
+            <select id="outsideProfile" disabled>
+              <option value="coastal">Coastal</option>
+              <option value="offshore">Offshore</option>
+            </select>
+          </label>
+          <button id="refreshRegions" type="button" disabled>Refresh harbour regions</button>
+        </div>
+        <p id="autoProfileStatus" class="muted">Waiting for Traffic Core state.</p>
+        <div id="autoProfileMetrics" class="metrics"></div>
+      </section>
+      <section>
+        <h2>Profile limits</h2>
+        <div class="controls profile-toolbar">
+          <label>Profile to edit
+            <select id="editProfile" disabled>
+              <option value="anchor">Anchored</option>
+              <option value="harbor">Harbour</option>
+              <option value="coastal">Coastal</option>
+              <option value="offshore">Offshore</option>
+            </select>
+          </label>
+          <label>Vessel size
+            <select id="editSize" disabled>
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </label>
+          <button id="resetSensitivity" type="button" disabled>Reset 100%</button>
+          <button id="resetProfileDefaults" type="button" disabled>Factory reset profile</button>
+          <button id="saveProfiles" type="button" disabled>Save Profile</button>
+        </div>
+        <div class="profile-grid">
+          <div class="profile-card">
+            <h3>Sensitivity</h3>
+            <label>CPA sensitivity <strong id="cpaSensitivityValue">100%</strong>
+              <input id="cpaSensitivity" type="range" min="0" max="200" step="1" disabled />
+            </label>
+            <label>TCPA lookahead <strong id="tcpaLookaheadValue">100%</strong>
+              <input id="tcpaLookahead" type="range" min="0" max="200" step="1" disabled />
+            </label>
+            <label>Repeat sensitivity <strong id="repeatSensitivityValue">100%</strong>
+              <input id="repeatSensitivity" type="range" min="0" max="200" step="1" disabled />
+            </label>
+          </div>
+          <div class="profile-card">
+            <h3>Traffic advisory</h3>
+            <p class="muted">Targets inside these limits are warnings.</p>
+            <label>CPA less than <strong id="warningCpaValue">—</strong>
+              <input id="warningCpa" data-kind="warning" data-field="cpa" type="range" min="0" max="10000" step="25" disabled />
+            </label>
+            <label>TCPA less than <strong id="warningTcpaValue">—</strong>
+              <input id="warningTcpa" data-kind="warning" data-field="tcpa" type="range" min="0" max="3600" step="60" disabled />
+            </label>
+            <label>Ignore below <strong id="warningSpeedValue">—</strong>
+              <input id="warningSpeed" data-kind="warning" data-field="speed" type="range" min="0" max="30" step="0.5" disabled />
+            </label>
+          </div>
+          <div class="profile-card">
+            <h3>Collision alarm</h3>
+            <p class="muted">Targets inside these limits are alarms.</p>
+            <label>CPA less than <strong id="dangerCpaValue">—</strong>
+              <input id="dangerCpa" data-kind="danger" data-field="cpa" type="range" min="0" max="10000" step="25" disabled />
+            </label>
+            <label>TCPA less than <strong id="dangerTcpaValue">—</strong>
+              <input id="dangerTcpa" data-kind="danger" data-field="tcpa" type="range" min="0" max="3600" step="60" disabled />
+            </label>
+            <label>Ignore below <strong id="dangerSpeedValue">—</strong>
+              <input id="dangerSpeed" data-kind="danger" data-field="speed" type="range" min="0" max="30" step="0.5" disabled />
+            </label>
+          </div>
+        </div>
+        <p id="profileStatus" class="muted">Waiting for Traffic Core profile settings.</p>
+      </section>
+      <section>
+        <h2>Audio Policy</h2>
+        <p id="audioPolicyStatus" class="muted">Waiting for Traffic Core state.</p>
+        <div class="controls audio-policy-row">
+          <button id="mute" type="button" disabled>Mute audio</button>
+          <span class="muted">Traffic Core audio policy. Browser playback is enabled separately in Console or AJRM Marine Audio.</span>
+        </div>
+        <div class="controls audio-policy-row">
+          <label><input id="automuteStationary" type="checkbox" disabled /> Automute when stationary</label>
+          <label>Stationary threshold (m/s)
+            <input id="automuteSpeed" type="number" min="0" step="0.01" disabled />
+          </label>
+        </div>
+        <div class="controls audio-policy-row all-well-row">
+          <label><input id="allWellEnabled" type="checkbox" disabled /> All's well reassurance</label>
+          <label>Message
+            <input id="allWellMessage" type="text" maxlength="160" disabled />
+          </label>
+          <label>Quiet period (minutes)
+            <input id="allWellInterval" type="number" min="1" max="240" step="1" disabled />
+          </label>
+        </div>
+      </section>
+      <section>
+        <h2>Target diagnostics <span id="targetCount">0</span></h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Target</th><th>State</th><th>Range</th><th>CPA</th>
+              <th>TCPA</th><th>Freshness</th><th>Control</th>
+            </tr></thead>
+            <tbody id="targets"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
