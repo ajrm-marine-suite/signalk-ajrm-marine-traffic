@@ -181,7 +181,7 @@ test("same-state encounter text refresh is throttled and visual-only", () => {
   assert.equal(revision.length, 1);
   assert.deepEqual(revision[0].value.method, ["visual"]);
   assert.equal(revision[0].value.data.ajrmMarineNotifications.delivery.audio, false);
-  assert.match(revision[0].value.message, /CPA 90 meters/);
+  assert.match(revision[0].value.message, /90 meters/);
 });
 
 test("Engine encounter messages use miles without saying nautical", () => {
@@ -196,16 +196,34 @@ test("Engine encounter messages use miles without saying nautical", () => {
     "2026-06-20T08:00:00.000Z",
   )[0];
 
-  assert.match(output.value.message, /CPA 0\.9 miles in 16 minutes/);
+  assert.match(output.value.message, /CPA will be on your starboard side\. 0\.9 miles in 16 minutes/);
+  assert.doesNotMatch(output.value.message, /CPA will be on your starboard side\. CPA /);
   assert.doesNotMatch(output.value.message, /nautical/i);
+});
+
+test("Engine encounter messages keep CPA label when there is no passing phrase", () => {
+  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+  const value = projection("warn");
+  value.targets[0].encounter.cpa = 1667;
+  value.targets[0].encounter.tcpa = 960;
+  delete value.targets[0].encounter.cpaBearingRelative;
+  delete value.targets[0].encounter.bearingRelative;
+
+  const output = reconcileNotifications(
+    runtime,
+    value,
+    "2026-06-20T08:00:00.000Z",
+  )[0];
+
+  assert.match(output.value.message, /CPA 0\.9 miles in 16 minutes/);
 });
 
 test("Engine encounter distance wording follows preferred distance units", () => {
   const cases = [
-    ["km", /CPA 1\.7 kilometers in 16 minutes/],
-    ["m", /CPA 1667 meters in 16 minutes/],
-    ["ft", /CPA 1\.0 miles in 16 minutes/],
-    ["mi", /CPA 1\.0 miles in 16 minutes/],
+    ["km", /1\.7 kilometers in 16 minutes/],
+    ["m", /1667 meters in 16 minutes/],
+    ["ft", /1\.0 miles in 16 minutes/],
+    ["mi", /1\.0 miles in 16 minutes/],
   ];
 
   for (const [distanceUnit, expected] of cases) {
@@ -242,7 +260,7 @@ test("Engine encounter distance wording uses feet below 1000 feet", () => {
     "2026-06-20T08:00:00.000Z",
   )[0];
 
-  assert.match(output.value.message, /CPA 820 feet in 60 seconds/);
+  assert.match(output.value.message, /820 feet in 60 seconds/);
 });
 
 function assertResolvedClear(output, expected = {}) {

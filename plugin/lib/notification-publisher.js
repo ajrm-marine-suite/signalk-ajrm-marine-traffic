@@ -342,8 +342,9 @@ function encounterMessage(target, state, runtime = {}) {
     parts.push(geometry);
   }
   if (Number.isFinite(target.encounter.cpa) && Number.isFinite(target.encounter.tcpa)) {
+    const cpaLabel = geometry.includes("CPA will be") ? "" : "CPA ";
     parts.push(
-      `CPA ${distanceText(target.encounter.cpa, runtime.distanceUnit)} in ${timeText(target.encounter.tcpa)}`,
+      `${cpaLabel}${distanceText(target.encounter.cpa, runtime.distanceUnit)} in ${timeText(target.encounter.tcpa)}`,
     );
   }
   return `${parts.join(". ")}.`;

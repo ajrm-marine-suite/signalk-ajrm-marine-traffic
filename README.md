@@ -128,7 +128,7 @@ See [AJRM Marine Logger replay](docs/REPLAY.md) for the offline replay workflow.
 
 ```bash
 cd ~/.signalk
-npm install git+ssh://git@ssh.github.com:443/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.0 --omit=dev --no-package-lock
+npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.1 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 
@@ -138,6 +138,10 @@ collision notifications and target projections.
 The component contracts are documented in this repository under `docs/`.
 
 ## Version
+
+`v0.5.1` removes the repeated `CPA` label from encounter announcements when
+the message already includes a `CPA will be ...` passing phrase. Plain CPA
+announcements still include the `CPA` label.
 
 `v0.5.0` preserves focused Audio Policy text/number field edits during the
 status refresh loop and applies them when the field changes or Enter is pressed.
