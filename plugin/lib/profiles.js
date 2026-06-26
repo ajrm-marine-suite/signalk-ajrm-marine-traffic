@@ -91,22 +91,23 @@ function stateFor(target, profileName = "harbor", profileSettings = {}) {
     profileName
   ];
   const size = vesselSize(target);
-  const danger = scaledCriteria(
-    profile.danger?.bySize?.[size] || profile.danger?.[size] || profile.danger,
-    sensitivity,
-  );
-  const warning = scaledCriteria(
-    profile.warning?.bySize?.[size] ||
-      profile.warning?.[size] ||
-      profile.warning,
-    sensitivity,
-  );
+  const danger = scaledCriteria(criteriaForSize(profile.danger, size), sensitivity);
+  const warning = scaledCriteria(criteriaForSize(profile.warning, size), sensitivity);
   const speedKnots =
     Math.max(Number(target?.sog) || 0, Number(target?.ownSog) || 0) *
     1.9438444924406046;
   if (matches(target, danger, speedKnots)) return "alarm";
   if (matches(target, warning, speedKnots)) return "warn";
   return "normal";
+}
+
+function criteriaForSize(criteria = {}, size = "small") {
+  const sized = criteria.bySize?.[size] || criteria[size];
+  if (!sized) return criteria;
+  if ((Number(sized.cpa) || 0) <= 0 && (Number(criteria.cpa) || 0) > 0) {
+    return criteria;
+  }
+  return sized;
 }
 
 function scaledCriteria(criteria, sensitivity) {

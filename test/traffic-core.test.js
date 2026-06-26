@@ -359,6 +359,62 @@ test("Display-style NM CPA thresholds are normalized before Engine evaluation", 
   assert.equal(target.encounter.state, "alarm");
 });
 
+test("anchor top-level CPA thresholds are used when stale by-size CPA is zero", () => {
+  const state = createTrafficCore({
+    sessionId: "anchor-threshold-session",
+    profile: "anchor",
+    profileSettings: {
+      anchor: {
+        warning: {
+          cpa: 1200,
+          tcpa: 3600,
+          speed: 0,
+          bySize: {
+            small: { cpa: 0, tcpa: 3600, speed: 0 },
+            medium: { cpa: 0, tcpa: 3600, speed: 0 },
+            large: { cpa: 0, tcpa: 3600, speed: 0 },
+          },
+        },
+        danger: {
+          cpa: 250,
+          tcpa: 900,
+          speed: 0,
+          bySize: {
+            small: { cpa: 0, tcpa: 3600, speed: 0 },
+            medium: { cpa: 0, tcpa: 3600, speed: 0 },
+            large: { cpa: 0, tcpa: 3600, speed: 0 },
+          },
+        },
+      },
+    },
+  });
+  const timestamp = "2026-06-26T18:52:00.000Z";
+  ingestDelta(
+    state,
+    delta("vessels.self", [
+      { path: "navigation.position", value: { latitude: 50, longitude: -1 } },
+      { path: "navigation.speedOverGround", value: 0 },
+      { path: "navigation.courseOverGroundTrue", value: 0 },
+    ], timestamp),
+  );
+  ingestDelta(
+    state,
+    delta("vessels.urn:mrn:imo:mmsi:235900004", [
+      { path: "mmsi", value: "235900004" },
+      { path: "name", value: "Ferry Alpha" },
+      { path: "navigation.position", value: { latitude: 50.003, longitude: -1 } },
+      { path: "navigation.speedOverGround", value: 4 },
+      { path: "navigation.courseOverGroundTrue", value: Math.PI },
+      { path: "design.length", value: { overall: 96 } },
+    ], timestamp),
+  );
+  const target = calculateProjection(
+    state,
+    "2026-06-26T18:52:01.000Z",
+  ).targets[0];
+  assert.equal(target.encounter.state, "alarm");
+});
+
 test("profile per-size thresholds change Engine CPA and TCPA evaluation", () => {
   const state = createTrafficCore({
     sessionId: "threshold-session",

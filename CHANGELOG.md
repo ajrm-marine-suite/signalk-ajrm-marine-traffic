@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.6
+
+- Use top-level Anchor CPA/TCPA thresholds when stale per-size CPA entries are zero, so edited anchorage guard settings affect collision evaluation.
+
 ## 0.5.5
 
 - Omit MMSI-style fallback names from spoken encounter messages even when the Traffic projection has copied the MMSI into the target name field.
