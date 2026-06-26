@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.5
+
+- Omit MMSI-style fallback names from spoken encounter messages even when the Traffic projection has copied the MMSI into the target name field.
+
 ## 0.5.4
 
 - Publish a speech-friendly encounter message that omits MMSI-only vessel identifiers while keeping the written notification text unchanged.

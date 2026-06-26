@@ -332,7 +332,7 @@ function encounterMessage(target, state, runtime = {}, options = {}) {
       : target.encounter.vesselSize === "medium"
         ? "Medium vessel"
         : "Small craft";
-  const name = options.spoken ? target.name : target.name || target.mmsi || "unknown vessel";
+  const name = options.spoken ? spokenTargetName(target) : target.name || target.mmsi || "unknown vessel";
   const parts = [`${stateLabel(state)}. ${size}${name ? ` ${name}` : ""}`];
   if (Number.isFinite(target.encounter.bearingRelative)) {
     parts[0] += ` at ${clockPosition(target.encounter.bearingRelative)} o'clock`;
@@ -350,6 +350,15 @@ function encounterMessage(target, state, runtime = {}, options = {}) {
     );
   }
   return `${parts.join(". ")}.`;
+}
+
+function spokenTargetName(target) {
+  const name = String(target?.name || "").trim();
+  return name && !isNumericIdentifier(name) ? name : "";
+}
+
+function isNumericIdentifier(value) {
+  return /^\d{7,12}$/.test(String(value || "").trim());
 }
 
 function encounterGeometryPhrase(target, state) {

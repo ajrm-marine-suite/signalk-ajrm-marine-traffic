@@ -2,6 +2,9 @@
 
 Server-side collision and navigation-safety core for the AJRM Marine suite.
 
+Version `0.5.5` also suppresses MMSI-style fallback names in spoken encounter
+messages when the Traffic projection has copied MMSI into the name field.
+
 Version `0.5.4` keeps MMSI-only vessel identifiers in written encounter
 notifications while publishing a shorter speech-friendly message for Audio.
 
@@ -136,7 +139,7 @@ See [AJRM Marine Logger replay](docs/REPLAY.md) for the offline replay workflow.
 
 ```bash
 cd ~/.signalk
-npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.4 --omit=dev --no-package-lock
+npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.5 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 

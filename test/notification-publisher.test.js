@@ -241,6 +241,28 @@ test("Engine encounter audio omits MMSI when the vessel has no name", () => {
   assert.doesNotMatch(presentation.audioMessage, /235900007/);
 });
 
+test("Engine encounter audio omits MMSI when the projection name is the MMSI fallback", () => {
+  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+  const value = projection("alarm");
+  value.targets[0].mmsi = "235900007";
+  value.targets[0].name = "235900007";
+  value.targets[0].encounter.vesselSize = "small";
+  value.targets[0].encounter.bearingRelative = 0;
+  value.targets[0].encounter.cpa = 288;
+  value.targets[0].encounter.tcpa = 1107;
+
+  const output = reconcileNotifications(
+    runtime,
+    value,
+    "2026-06-20T08:00:00.000Z",
+  )[0];
+  const presentation = output.value.data.ajrmMarineNotifications.presentation;
+
+  assert.match(output.value.message, /Small craft 235900007 at 12 o'clock/);
+  assert.match(presentation.audioMessage, /Small craft at 12 o'clock/);
+  assert.doesNotMatch(presentation.audioMessage, /235900007/);
+});
+
 test("Engine encounter distance wording follows preferred distance units", () => {
   const cases = [
     ["km", /1\.7 kilometers in 16 minutes/],
