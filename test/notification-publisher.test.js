@@ -218,6 +218,29 @@ test("Engine encounter messages keep CPA label when there is no passing phrase",
   assert.match(output.value.message, /CPA 0\.9 miles in 16 minutes/);
 });
 
+test("Engine encounter audio omits MMSI when the vessel has no name", () => {
+  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+  const value = projection("warn");
+  value.targets[0].mmsi = "235900007";
+  value.targets[0].name = "";
+  value.targets[0].encounter.vesselSize = "small";
+  value.targets[0].encounter.bearingRelative = 0;
+  value.targets[0].encounter.cpa = 3334;
+  value.targets[0].encounter.tcpa = 3600;
+
+  const output = reconcileNotifications(
+    runtime,
+    value,
+    "2026-06-20T08:00:00.000Z",
+  )[0];
+  const presentation = output.value.data.ajrmMarineNotifications.presentation;
+
+  assert.match(output.value.message, /Small craft 235900007 at 12 o'clock/);
+  assert.match(presentation.message, /Small craft 235900007 at 12 o'clock/);
+  assert.match(presentation.audioMessage, /Small craft at 12 o'clock/);
+  assert.doesNotMatch(presentation.audioMessage, /235900007/);
+});
+
 test("Engine encounter distance wording follows preferred distance units", () => {
   const cases = [
     ["km", /1\.7 kilometers in 16 minutes/],

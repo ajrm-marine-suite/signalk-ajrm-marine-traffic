@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.4
+
+- Publish a speech-friendly encounter message that omits MMSI-only vessel identifiers while keeping the written notification text unchanged.
+
 ## 0.5.3
 
 - Enable the stationary automute master switch and All's well reassurance by

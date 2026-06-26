@@ -2,6 +2,9 @@
 
 Server-side collision and navigation-safety core for the AJRM Marine suite.
 
+Version `0.5.4` keeps MMSI-only vessel identifiers in written encounter
+notifications while publishing a shorter speech-friendly message for Audio.
+
 Version `0.5.3` enables the stationary automute master switch and All's well
 reassurance by default on fresh installs, while preserving explicit off
 settings. Anchor and Harbour default to automute while stationary; Coastal and
@@ -133,7 +136,7 @@ See [AJRM Marine Logger replay](docs/REPLAY.md) for the offline replay workflow.
 
 ```bash
 cd ~/.signalk
-npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.3 --omit=dev --no-package-lock
+npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.4 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 

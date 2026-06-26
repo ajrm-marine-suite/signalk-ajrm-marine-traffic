@@ -38,6 +38,7 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
 
     const previous = runtime.active.get(path);
     const message = encounterMessage(target, state, runtime);
+    const audioMessage = encounterMessage(target, state, runtime, { spoken: true });
     const name = String(target.name || identity);
     const nowMs = Date.parse(now) || 0;
     const metadataChanged = previous && previous.name !== name;
@@ -107,6 +108,7 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
               title: String(target.name || identity),
               label: stateLabel(state),
               message,
+              audioMessage,
               category: "cpa",
               facts: [
                 target.encounter.vesselSize || "",
@@ -323,15 +325,15 @@ function stateLabel(state) {
   return "Watch";
 }
 
-function encounterMessage(target, state, runtime = {}) {
+function encounterMessage(target, state, runtime = {}, options = {}) {
   const size =
     target.encounter.vesselSize === "large"
       ? "Large vessel"
       : target.encounter.vesselSize === "medium"
         ? "Medium vessel"
         : "Small craft";
-  const name = target.name || target.mmsi || "unknown vessel";
-  const parts = [`${stateLabel(state)}. ${size} ${name}`];
+  const name = options.spoken ? target.name : target.name || target.mmsi || "unknown vessel";
+  const parts = [`${stateLabel(state)}. ${size}${name ? ` ${name}` : ""}`];
   if (Number.isFinite(target.encounter.bearingRelative)) {
     parts[0] += ` at ${clockPosition(target.encounter.bearingRelative)} o'clock`;
   } else if (Number.isFinite(target.encounter.bearingTrue)) {

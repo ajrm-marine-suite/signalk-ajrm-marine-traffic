@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AJRM Marine Traffic Core API",
-    "version": "0.5.2",
+    "version": "0.5.4",
     "description": "Authoritative Traffic Core capability, target, Auto Profile, Audio Policy, and command projections."
   },
   "servers": [
