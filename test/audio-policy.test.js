@@ -181,6 +181,23 @@ test("Audio Policy projection reports per-profile automute allowance", () => {
   assert.match(projection.status, /disabled for this profile/);
 });
 
+test("Audio Policy enables stationary automute and All's well by default", () => {
+  const policy = createAudioPolicy();
+
+  assert.equal(policy.automuteStationary, true);
+  assert.equal(policy.allWellEnabled, true);
+});
+
+test("Audio Policy allows stationary automute and All's well to be disabled", () => {
+  const policy = createAudioPolicy({
+    automuteStationary: false,
+    allWellEnabled: false,
+  });
+
+  assert.equal(policy.automuteStationary, false);
+  assert.equal(policy.allWellEnabled, false);
+});
+
 test("Audio Policy normalizes All's well command settings", () => {
   const policy = createAudioPolicy();
 

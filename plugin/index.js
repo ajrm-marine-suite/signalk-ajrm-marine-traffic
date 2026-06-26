@@ -175,7 +175,7 @@ module.exports = function ajrmMarineTraffic(app) {
       automuteStationary: {
         type: "boolean",
         title: "Enable stationary automute master switch",
-        default: false,
+        default: true,
       },
       automuteStationarySpeed: {
         type: "number",
@@ -186,7 +186,7 @@ module.exports = function ajrmMarineTraffic(app) {
       allWellEnabled: {
         type: "boolean",
         title: "Enable All's well reassurance",
-        default: false,
+        default: true,
       },
       allWellMessage: {
         type: "string",
@@ -996,13 +996,13 @@ function normalizeOptions(value) {
     autoProfile: normalizeAutoProfileOptions(value.autoProfile),
     profiles: normalizeProfileSettings(value.profiles, profile),
     muted: value.muted === true,
-    automuteStationary: value.automuteStationary === true,
+    automuteStationary: value.automuteStationary !== false,
     automuteStationarySpeed:
       Number.isFinite(Number(value.automuteStationarySpeed)) &&
       Number(value.automuteStationarySpeed) >= 0
         ? Number(value.automuteStationarySpeed)
         : DEFAULT_AUTOMUTE_STATIONARY_SPEED,
-    allWellEnabled: value.allWellEnabled === true,
+    allWellEnabled: value.allWellEnabled !== false,
     allWellMessage:
       String(value.allWellMessage || "").trim() || DEFAULT_ALL_WELL_MESSAGE,
     allWellIntervalMinutes:

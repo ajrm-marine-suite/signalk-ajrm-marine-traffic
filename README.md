@@ -2,9 +2,10 @@
 
 Server-side collision and navigation-safety core for the AJRM Marine suite.
 
-Version `0.5.2` makes stationary automute an explicit per-profile setting.
-Anchor and Harbour default to automute while stationary; Coastal and Offshore
-default to keeping audio enabled.
+Version `0.5.3` enables the stationary automute master switch and All's well
+reassurance by default on fresh installs, while preserving explicit off
+settings. Anchor and Harbour default to automute while stationary; Coastal and
+Offshore default to keeping audio enabled.
 
 Status: installable simulator-test Traffic Core. It is disabled by default; when
 enabled it is the authoritative AIS traffic provider for target projections,
@@ -132,7 +133,7 @@ See [AJRM Marine Logger replay](docs/REPLAY.md) for the offline replay workflow.
 
 ```bash
 cd ~/.signalk
-npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.2 --omit=dev --no-package-lock
+npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.3 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 
