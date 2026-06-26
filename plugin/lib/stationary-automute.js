@@ -2,7 +2,12 @@
 
 const DEFAULT_STATIONARY_AUTOMUTE_STABLE_SAMPLES = 3;
 
-function stationaryAutomuteProfileAllowed(profile) {
+function stationaryAutomuteProfileAllowed(profile, profileSettings = {}) {
+	const profileName = profile === "harbour" ? "harbor" : profile;
+	const profilePolicy = profileSettings?.[profileName];
+	if (typeof profilePolicy?.automuteStationary === "boolean") {
+		return profilePolicy.automuteStationary;
+	}
 	return profile === "anchor" || profile === "harbor" || profile === "harbour";
 }
 
@@ -44,6 +49,7 @@ function stationaryAutomuteTransition({
 	currentProfile,
 	force = false,
 	selfTarget,
+	profileSettings,
 	settings = {},
 	state = {},
 	stableSamples = DEFAULT_STATIONARY_AUTOMUTE_STABLE_SAMPLES,
@@ -57,7 +63,10 @@ function stationaryAutomuteTransition({
 		};
 	}
 
-	const automuteAllowed = stationaryAutomuteProfileAllowed(currentProfile);
+	const automuteAllowed = stationaryAutomuteProfileAllowed(
+		currentProfile,
+		profileSettings,
+	);
 	if (!automuteAllowed) {
 		const shouldClearAutomaticMute =
 			state.automaticMuteActive === true && settings.muted === true;
@@ -191,11 +200,11 @@ function stationaryAutomuteStatusText({
 
 	if (!automuteAllowed) {
 		if (settings.muted && state.manualOverride === true) {
-			return "Muted manually. Automute only applies in Harbour or Anchor profiles.";
+			return "Muted manually. Stationary automute is disabled for this profile.";
 		}
 		return settings.muted
-			? "Muted. Automute only applies in Harbour or Anchor profiles."
-			: "Sound enabled. Automute only applies in Harbour or Anchor profiles.";
+			? "Muted. Stationary automute is disabled for this profile."
+			: "Sound enabled. Stationary automute is disabled for this profile.";
 	}
 
 	if (stationary == null) {

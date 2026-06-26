@@ -16,7 +16,8 @@ test("Engine bundles its own administration webapp", () => {
   }
   const html = fs.readFileSync(path.join(__dirname, "..", "public", "index.html"), "utf8");
   const app = fs.readFileSync(path.join(__dirname, "..", "public", "app.js"), "utf8");
-  assert.match(html, /Profile limits/);
+  assert.match(html, /Profile settings/);
+  assert.match(html, /Automute stationary in this profile/);
   assert.match(html, /Traffic advisory/);
   assert.match(html, /Collision alarm/);
   assert.match(html, /All's well reassurance/);
@@ -27,6 +28,7 @@ test("Engine bundles its own administration webapp", () => {
   assert.match(app, /Mute audio/);
   assert.match(app, /allWellMessage/);
   assert.match(app, /allWellIntervalMinutes/);
+  assert.match(app, /profileAutomuteStationary/);
   assert.match(app, /setEditableInputValue/);
   assert.match(app, /document\.activeElement === input/);
   assert.match(app, /event\.key === "Enter"/);

@@ -9,6 +9,7 @@ const DEFAULT_PROFILES = {
   anchor: profileDefaults(
     { cpa: 0, tcpa: 3600, speed: 0 },
     { cpa: 0, tcpa: 3600, speed: 0 },
+    true,
   ),
   harbor: profileDefaults(
     {
@@ -21,6 +22,7 @@ const DEFAULT_PROFILES = {
       medium: { cpa: 50, tcpa: 120, speed: 3 },
       large: { cpa: 100, tcpa: 180, speed: 3 },
     },
+    true,
   ),
   coastal: profileDefaults(
     {
@@ -60,6 +62,7 @@ const els = {
   autoProfileStatus: document.getElementById("autoProfileStatus"),
   autoProfileMetrics: document.getElementById("autoProfileMetrics"),
   editProfile: document.getElementById("editProfile"),
+  profileAutomuteStationary: document.getElementById("profileAutomuteStationary"),
   editSize: document.getElementById("editSize"),
   resetSensitivity: document.getElementById("resetSensitivity"),
   resetProfileDefaults: document.getElementById("resetProfileDefaults"),
@@ -199,11 +202,13 @@ function renderProfileEditor(enabled) {
   const profile = profileDraft[profileName];
   for (const control of profileControls()) control.disabled = !enabled;
   els.editProfile.disabled = !enabled;
+  els.profileAutomuteStationary.disabled = !enabled;
   els.editSize.disabled = !enabled;
   els.resetSensitivity.disabled = !enabled;
   els.resetProfileDefaults.disabled = !enabled;
   els.saveProfiles.disabled = !enabled || !profilesDirty;
   els.cpaSensitivity.value = percent(profile.cpaSensitivity);
+  els.profileAutomuteStationary.checked = profile.automuteStationary === true;
   els.tcpaLookahead.value = percent(profile.tcpaLookahead);
   els.repeatSensitivity.value = percent(profile.repeatSensitivity);
   els.cpaSensitivityValue.textContent = `${els.cpaSensitivity.value}%`;
@@ -295,6 +300,12 @@ for (const control of ["cpaSensitivity", "tcpaLookahead", "repeatSensitivity"]) 
     markProfilesDirty();
   });
 }
+els.profileAutomuteStationary.addEventListener("change", () => {
+  const profile = editableProfile();
+  if (!profile) return;
+  profile.automuteStationary = els.profileAutomuteStationary.checked;
+  markProfilesDirty();
+});
 for (const input of criteriaControls()) {
   input.addEventListener("input", () => {
     const profile = editableProfile();
@@ -331,7 +342,7 @@ els.saveProfiles.addEventListener("click", () => runCommand(async () => {
   profileDraft = normalizeProfiles(result.profiles);
   profilesDirty = false;
   editingProfile = savedProfile;
-  return `Saved ${labelForProfile(savedProfile)} profile limits.`;
+  return `Saved ${labelForProfile(savedProfile)} profile settings.`;
 }));
 els.mute.addEventListener("click", () => runCommand(async () => {
   const muted = snapshot?.audioPolicy?.muted !== true;
@@ -386,8 +397,9 @@ function setEditableInputValue(input, value) {
   if (document.activeElement === input) return;
   input.value = value;
 }
-function profileDefaults(warning, danger) {
+function profileDefaults(warning, danger, automuteStationary = false) {
   return {
+    automuteStationary,
     cpaSensitivity: 1,
     tcpaLookahead: 1,
     repeatSensitivity: 1,
@@ -406,6 +418,10 @@ function normalizeProfiles(value = {}) {
     const supplied = value[profile] || {};
     const defaults = DEFAULT_PROFILES[profile];
     profiles[profile] = {
+      automuteStationary:
+        typeof supplied.automuteStationary === "boolean"
+          ? supplied.automuteStationary
+          : defaults.automuteStationary,
       cpaSensitivity: nonNegative(supplied.cpaSensitivity, defaults.cpaSensitivity),
       tcpaLookahead: nonNegative(supplied.tcpaLookahead, defaults.tcpaLookahead),
       repeatSensitivity: nonNegative(supplied.repeatSensitivity, defaults.repeatSensitivity),

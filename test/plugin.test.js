@@ -258,6 +258,7 @@ test("Engine command routes own profile and target silence state", async () => {
     body: {
       current: "coastal",
       coastal: {
+        automuteStationary: true,
         cpaSensitivity: 1.4,
         tcpaLookahead: 0.8,
         repeatSensitivity: 1.2,
@@ -272,6 +273,7 @@ test("Engine command routes own profile and target silence state", async () => {
   assert.equal(sensitivities.statusCode, 200);
   assert.equal(sensitivities.body.profiles.current, "coastal");
   assert.equal(sensitivities.body.profiles.coastal.cpaSensitivity, 1.4);
+  assert.equal(sensitivities.body.profiles.coastal.automuteStationary, true);
   assert.equal(sensitivities.body.profiles.coastal.tcpaLookahead, 0.8);
   assert.equal(sensitivities.body.profiles.coastal.repeatSensitivity, 1.2);
   assert.equal(sensitivities.body.profiles.coastal.warning.bySize.small.cpa, 100);
@@ -282,6 +284,7 @@ test("Engine command routes own profile and target silence state", async () => {
   assert.equal(status.body.enabled, true);
   assert.equal(status.body.profile, "coastal");
   assert.equal(status.body.profiles.coastal.cpaSensitivity, 1.4);
+  assert.equal(status.body.profiles.coastal.automuteStationary, true);
 
   const unsilence = invokeRoute(router, "post", "/commands/unsilence-all");
   assert.equal(unsilence.body.unsilenced, 1);

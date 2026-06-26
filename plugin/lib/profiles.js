@@ -4,10 +4,12 @@ const { METERS_PER_NM } = require("./navigation");
 
 const PROFILES = {
   anchor: {
+    automuteStationary: true,
     warning: { cpa: 0, tcpa: 3600, speed: 0 },
     danger: { cpa: 0, tcpa: 3600, speed: 0 },
   },
   harbor: {
+    automuteStationary: true,
     warning: {
       small: { cpa: 50, tcpa: 180, speed: 0.5 },
       medium: { cpa: 100, tcpa: 240, speed: 0.5 },
@@ -20,6 +22,7 @@ const PROFILES = {
     },
   },
   coastal: {
+    automuteStationary: false,
     warning: {
       small: { cpa: 0.4 * METERS_PER_NM, tcpa: 600, speed: 0 },
       medium: { cpa: 0.8 * METERS_PER_NM, tcpa: 900, speed: 0 },
@@ -32,6 +35,7 @@ const PROFILES = {
     },
   },
   offshore: {
+    automuteStationary: false,
     warning: {
       small: { cpa: 0.5 * METERS_PER_NM, tcpa: 720, speed: 0 },
       medium: { cpa: 1.25 * METERS_PER_NM, tcpa: 1200, speed: 0 },
@@ -56,6 +60,10 @@ function normalizeProfileSettings(value = {}, current = "harbor") {
     const defaults = defaultProfileSettings(profile);
     const supplied = value[profile] || {};
     settings[profile] = {
+      automuteStationary:
+        typeof supplied.automuteStationary === "boolean"
+          ? supplied.automuteStationary
+          : defaults.automuteStationary,
       cpaSensitivity: nonNegative(supplied.cpaSensitivity, 1),
       tcpaLookahead: nonNegative(supplied.tcpaLookahead, 1),
       repeatSensitivity: nonNegative(supplied.repeatSensitivity, 1),
@@ -116,6 +124,7 @@ function defaultProfileSettings(profileName) {
 
 function normalizeProfileCriteria(profile = {}) {
   return {
+    automuteStationary: profile.automuteStationary === true,
     warning: normalizeCriteria(profile.warning, {}),
     danger: normalizeCriteria(profile.danger, {}),
   };

@@ -111,9 +111,9 @@ module.exports = function ajrmMarineTraffic(app) {
       },
       profiles: {
         type: "object",
-        title: "Per-profile sensitivity multipliers",
+        title: "Per-profile Traffic settings",
         description:
-          "Traffic Core CPA, TCPA and repeat sensitivity settings for each sailing profile.",
+          "Traffic Core CPA, TCPA, repeat sensitivity, and stationary automute settings for each sailing profile.",
       },
       autoProfile: {
         type: "object",
@@ -174,7 +174,7 @@ module.exports = function ajrmMarineTraffic(app) {
       },
       automuteStationary: {
         type: "boolean",
-        title: "Automute when stationary in Anchor or Harbour profiles",
+        title: "Enable stationary automute master switch",
         default: false,
       },
       automuteStationarySpeed: {
@@ -555,6 +555,10 @@ module.exports = function ajrmMarineTraffic(app) {
       const settings = setProfileSettings(state, req.body || {});
       options.profile = state.profile;
       options.profiles = settings;
+      evaluateAudioPolicy(audioPolicy, state.profile, state.own.sog, {
+        force: true,
+        profileSettings: state.profileSettings,
+      });
       recalculate();
       persistOptions();
       debug("engine.command.profiles", {
@@ -589,6 +593,7 @@ module.exports = function ajrmMarineTraffic(app) {
     });
     evaluateAudioPolicy(audioPolicy, state.profile, state.own.sog, {
       force: req.body?.automuteStationary !== undefined,
+      profileSettings: state.profileSettings,
     });
     if (previousMuted !== audioPolicy.muted || req.body?.muted !== undefined) {
       audioPolicy.correlationId = randomUUID();
@@ -710,7 +715,9 @@ module.exports = function ajrmMarineTraffic(app) {
       persistOptions();
     }
     const previousMuted = audioPolicy.muted;
-    const audioAction = evaluateAudioPolicy(audioPolicy, state.profile, state.own.sog);
+    const audioAction = evaluateAudioPolicy(audioPolicy, state.profile, state.own.sog, {
+      profileSettings: state.profileSettings,
+    });
     if (audioAction || previousMuted !== audioPolicy.muted) {
       audioPolicy.correlationId = randomUUID();
       audioPolicy.updatedAt = now;
@@ -927,6 +934,7 @@ module.exports = function ajrmMarineTraffic(app) {
       profile: state.profile,
       ownSog: state.own.sog,
       policy: audioPolicy,
+      profileSettings: state.profileSettings,
     });
     return lastAudioPolicyProjection;
   }

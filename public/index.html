@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AJRM Marine Traffic</title>
-    <link rel="stylesheet" href="./styles.css?v=0.8.9" />
-    <script defer src="./app.js?v=0.8.9"></script>
+    <link rel="stylesheet" href="./styles.css?v=0.5.2" />
+    <script defer src="./app.js?v=0.5.2"></script>
   </head>
   <body>
     <header>
@@ -52,7 +52,7 @@
         <div id="autoProfileMetrics" class="metrics"></div>
       </section>
       <section>
-        <h2>Profile limits</h2>
+        <h2>Profile settings</h2>
         <div class="controls profile-toolbar">
           <label>Profile to edit
             <select id="editProfile" disabled>
@@ -62,6 +62,7 @@
               <option value="offshore">Offshore</option>
             </select>
           </label>
+          <label><input id="profileAutomuteStationary" type="checkbox" disabled /> Automute stationary in this profile</label>
           <label>Vessel size
             <select id="editSize" disabled>
               <option value="small">Small</option>
@@ -123,7 +124,7 @@
           <span class="muted">Traffic Core audio policy. Browser playback is enabled separately in Console or AJRM Marine Audio.</span>
         </div>
         <div class="controls audio-policy-row">
-          <label><input id="automuteStationary" type="checkbox" disabled /> Automute when stationary</label>
+          <label><input id="automuteStationary" type="checkbox" disabled /> Enable stationary automute</label>
           <label>Stationary threshold (m/s)
             <input id="automuteSpeed" type="number" min="0" step="0.01" disabled />
           </label>

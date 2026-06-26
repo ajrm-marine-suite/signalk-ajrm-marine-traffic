@@ -29,10 +29,16 @@ function createAudioPolicy(options = {}) {
   };
 }
 
-function evaluateAudioPolicy(policy, profile, ownSog, { force = false } = {}) {
+function evaluateAudioPolicy(
+  policy,
+  profile,
+  ownSog,
+  { force = false, profileSettings } = {},
+) {
   const transition = stationaryAutomuteTransition({
     currentProfile: profile,
     force,
+    profileSettings,
     selfTarget: { sog: ownSog },
     settings: policy,
     state: policy.automuteState,
@@ -86,13 +92,17 @@ function audioPolicyProjection({
   profile,
   ownSog,
   policy,
+  profileSettings,
   generatedAt = new Date().toISOString(),
 }) {
   const stationary = stationaryAutomuteStationaryState({
     selfTarget: { sog: ownSog },
     threshold: policy.automuteStationarySpeed,
   });
-  const automuteAllowed = stationaryAutomuteProfileAllowed(profile);
+  const automuteAllowed = stationaryAutomuteProfileAllowed(
+    profile,
+    profileSettings,
+  );
   return {
     contract: "ais-plus-engine-audio-policy",
     contractVersion: 1,

@@ -8,6 +8,7 @@ const {
   createAudioPolicy,
   evaluateAudioPolicy,
 } = require("../plugin/lib/audio-policy");
+const { normalizeProfileSettings } = require("../plugin/lib/profiles");
 
 test("stationary automute is limited to Anchor and Harbour profiles", () => {
   const policy = createAudioPolicy({
@@ -18,6 +19,38 @@ test("stationary automute is limited to Anchor and Harbour profiles", () => {
   assert.equal(policy.muted, true);
   assert.deepEqual(evaluateAudioPolicy(policy, "coastal", 0), { muted: false });
   assert.equal(policy.muted, false);
+});
+
+test("profile settings default stationary automute by sailing profile", () => {
+  const profiles = normalizeProfileSettings();
+
+  assert.equal(profiles.anchor.automuteStationary, true);
+  assert.equal(profiles.harbor.automuteStationary, true);
+  assert.equal(profiles.coastal.automuteStationary, false);
+  assert.equal(profiles.offshore.automuteStationary, false);
+});
+
+test("stationary automute follows per-profile settings", () => {
+  const policy = createAudioPolicy({
+    automuteStationary: true,
+    automuteStationarySpeed: 0.35,
+  });
+  const profileSettings = {
+    anchor: { automuteStationary: false },
+    harbor: { automuteStationary: true },
+    coastal: { automuteStationary: true },
+    offshore: { automuteStationary: false },
+  };
+
+  assert.equal(
+    evaluateAudioPolicy(policy, "anchor", 0, { profileSettings }),
+    null,
+  );
+  assert.equal(policy.muted, false);
+  assert.deepEqual(evaluateAudioPolicy(policy, "coastal", 0, { profileSettings }), {
+    muted: true,
+  });
+  assert.equal(policy.muted, true);
 });
 
 test("stationary automute immediately releases on movement", () => {
@@ -131,6 +164,21 @@ test("Audio Policy projection carries session, sequence and correlation", () => 
   assert.equal(projection.allWellEnabled, true);
   assert.equal(projection.allWellMessage, "Still looking good.");
   assert.equal(projection.allWellIntervalMinutes, 45);
+});
+
+test("Audio Policy projection reports per-profile automute allowance", () => {
+  const policy = createAudioPolicy({ automuteStationary: true });
+  const projection = audioPolicyProjection({
+    profile: "anchor",
+    ownSog: 0,
+    policy,
+    profileSettings: {
+      anchor: { automuteStationary: false },
+    },
+  });
+
+  assert.equal(projection.automuteAllowed, false);
+  assert.match(projection.status, /disabled for this profile/);
 });
 
 test("Audio Policy normalizes All's well command settings", () => {
