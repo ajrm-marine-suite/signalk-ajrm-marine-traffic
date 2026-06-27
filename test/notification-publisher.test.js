@@ -23,7 +23,7 @@ function projection(state = "alarm") {
           cpaBearingRelative: Math.PI / 2,
           cpa: 125,
           tcpa: 180,
-          correlationId: "engine-correlation",
+          correlationId: "traffic-correlation",
           vesselSize: "large",
           ownSog: 5,
           ownCogTrue: 0,
@@ -36,8 +36,8 @@ function projection(state = "alarm") {
   };
 }
 
-test("Engine notifications are standard Signal K values with a compatible envelope", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+test("Traffic notifications are standard Signal K values with a compatible envelope", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   const outputs = reconcileNotifications(
     runtime,
     projection(),
@@ -51,17 +51,17 @@ test("Engine notifications are standard Signal K values with a compatible envelo
   assert.match(outputs[0].value.message, /CPA will be on your starboard side/);
   const envelope = outputs[0].value.data.ajrmMarineNotifications;
   assert.equal(envelope.provider, "ajrm-marine-traffic");
-  assert.equal(envelope.providerSessionId, "engine-session");
+  assert.equal(envelope.providerSessionId, "traffic-session");
   assert.equal(envelope.sourceSequence, 1);
-  assert.equal(envelope.correlationId, "engine-correlation");
+  assert.equal(envelope.correlationId, "traffic-correlation");
   assert.equal(envelope.subjectKey, "ajrm-marine:traffic:vessel:235900004");
   assert.equal(envelope.lifecycle, "active");
   assert.equal(envelope.priority.score, 800);
   assert.equal(envelope.delivery.audio, true);
 });
 
-test("Engine encounter messages use bow-relative clock bearing and include overtaking wording", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+test("Traffic encounter messages use bow-relative clock bearing and include overtaking wording", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   const value = projection("warn");
   value.targets[0].encounter.bearingTrue = 0;
   value.targets[0].encounter.bearingRelative = Math.PI / 2;
@@ -86,8 +86,8 @@ test("Engine encounter messages use bow-relative clock bearing and include overt
   );
 });
 
-test("Engine system events are one-shot broker history notifications", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+test("Traffic system events are one-shot broker history notifications", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   runtime.muteState = false;
   const output = systemEventNotification(
     runtime,
@@ -108,7 +108,7 @@ test("Engine system events are one-shot broker history notifications", () => {
   assert.equal(output.value.message, "GPS received.");
   const envelope = output.value.data.ajrmMarineNotifications;
   assert.equal(envelope.provider, "ajrm-marine-traffic");
-  assert.equal(envelope.providerSessionId, "engine-session");
+  assert.equal(envelope.providerSessionId, "traffic-session");
   assert.equal(envelope.lifecycle, "event");
   assert.equal(envelope.history.policy, "always");
   assert.equal(envelope.delivery.audio, true);
@@ -120,14 +120,14 @@ test("Engine system events are one-shot broker history notifications", () => {
 });
 
 test("unchanged state does not republish or duplicate audio", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   assert.equal(reconcileNotifications(runtime, projection()).length, 1);
   assert.deepEqual(reconcileNotifications(runtime, projection()), []);
 });
 
 test("same-state metadata refresh is visual-only and keeps correlation", () => {
   const runtime = createNotificationPublisher({
-    sessionId: "engine-session",
+    sessionId: "traffic-session",
     visualRefreshMs: 15000,
   });
   const initial = projection();
@@ -155,7 +155,7 @@ test("same-state metadata refresh is visual-only and keeps correlation", () => {
 
 test("same-state encounter text refresh is throttled and visual-only", () => {
   const runtime = createNotificationPublisher({
-    sessionId: "engine-session",
+    sessionId: "traffic-session",
     visualRefreshMs: 15000,
   });
   reconcileNotifications(
@@ -184,8 +184,8 @@ test("same-state encounter text refresh is throttled and visual-only", () => {
   assert.match(revision[0].value.message, /90 meters/);
 });
 
-test("Engine encounter messages use miles without saying nautical", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+test("Traffic encounter messages use miles without saying nautical", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   const value = projection("warn");
   value.targets[0].encounter.cpa = 1667;
   value.targets[0].encounter.tcpa = 960;
@@ -201,8 +201,8 @@ test("Engine encounter messages use miles without saying nautical", () => {
   assert.doesNotMatch(output.value.message, /nautical/i);
 });
 
-test("Engine encounter messages keep CPA label when there is no passing phrase", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+test("Traffic encounter messages keep CPA label when there is no passing phrase", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   const value = projection("warn");
   value.targets[0].encounter.cpa = 1667;
   value.targets[0].encounter.tcpa = 960;
@@ -218,8 +218,8 @@ test("Engine encounter messages keep CPA label when there is no passing phrase",
   assert.match(output.value.message, /CPA 0\.9 miles in 16 minutes/);
 });
 
-test("Engine encounter audio omits MMSI when the vessel has no name", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+test("Traffic encounter audio omits MMSI when the vessel has no name", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   const value = projection("warn");
   value.targets[0].mmsi = "235900007";
   value.targets[0].name = "";
@@ -241,8 +241,8 @@ test("Engine encounter audio omits MMSI when the vessel has no name", () => {
   assert.doesNotMatch(presentation.audioMessage, /235900007/);
 });
 
-test("Engine encounter audio omits MMSI when the projection name is the MMSI fallback", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+test("Traffic encounter audio omits MMSI when the projection name is the MMSI fallback", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   const value = projection("alarm");
   value.targets[0].mmsi = "235900007";
   value.targets[0].name = "235900007";
@@ -263,7 +263,7 @@ test("Engine encounter audio omits MMSI when the projection name is the MMSI fal
   assert.doesNotMatch(presentation.audioMessage, /235900007/);
 });
 
-test("Engine encounter distance wording follows preferred distance units", () => {
+test("Traffic encounter distance wording follows preferred distance units", () => {
   const cases = [
     ["km", /1\.7 kilometers in 16 minutes/],
     ["m", /1667 meters in 16 minutes/],
@@ -273,7 +273,7 @@ test("Engine encounter distance wording follows preferred distance units", () =>
 
   for (const [distanceUnit, expected] of cases) {
     const runtime = createNotificationPublisher({
-      sessionId: `engine-session-${distanceUnit}`,
+      sessionId: `traffic-session-${distanceUnit}`,
       distanceUnit,
     });
     const value = projection("warn");
@@ -290,9 +290,9 @@ test("Engine encounter distance wording follows preferred distance units", () =>
   }
 });
 
-test("Engine encounter distance wording uses feet below 1000 feet", () => {
+test("Traffic encounter distance wording uses feet below 1000 feet", () => {
   const runtime = createNotificationPublisher({
-    sessionId: "engine-session-feet",
+    sessionId: "traffic-session-feet",
     distanceUnit: "ft",
   });
   const value = projection("warn");
@@ -319,7 +319,7 @@ function assertResolvedClear(output, expected = {}) {
   assert.equal(output.value.data.mmsi, "235900004");
   const envelope = output.value.data.ajrmMarineNotifications;
   assert.equal(envelope.provider, "ajrm-marine-traffic");
-  assert.equal(envelope.providerSessionId, "engine-session");
+  assert.equal(envelope.providerSessionId, "traffic-session");
   assert.equal(envelope.lifecycle, "resolved");
   assert.equal(envelope.priority.level, "information");
   assert.equal(envelope.priority.score, 200);
@@ -347,7 +347,7 @@ function assertResolvedClear(output, expected = {}) {
 }
 
 test("de-escalation to normal and target loss publish a resolved normal clear", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   const active = reconcileNotifications(runtime, projection())[0];
   const normal = reconcileNotifications(
     runtime,
@@ -369,19 +369,19 @@ test("de-escalation to normal and target loss publish a resolved normal clear", 
   );
   assert.equal(missing.length, 1);
   assertResolvedClear(missing[0], {
-    correlationId: "engine-correlation",
+    correlationId: "traffic-correlation",
     subjectKey: "ajrm-marine:traffic:vessel:235900004",
     timestamp: "2026-06-20T08:01:00.000Z",
   });
 });
 
-test("stopping Engine clears every active notification", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+test("stopping Traffic clears every active notification", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   reconcileNotifications(runtime, projection());
   const clears = clearAllNotifications(runtime, "2026-06-20T08:02:00.000Z");
   assert.equal(clears.length, 1);
   assertResolvedClear(clears[0], {
-    correlationId: "engine-correlation",
+    correlationId: "traffic-correlation",
     subjectKey: "ajrm-marine:traffic:vessel:235900004",
     timestamp: "2026-06-20T08:02:00.000Z",
   });
@@ -389,14 +389,14 @@ test("stopping Engine clears every active notification", () => {
 });
 
 test("non-collision targets never publish alerts", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   const value = projection();
   value.targets[0].encounter.collisionCandidate = false;
   assert.deepEqual(reconcileNotifications(runtime, value), []);
 });
 
 test("silencing an active target clears its notification", () => {
-  const runtime = createNotificationPublisher({ sessionId: "engine-session" });
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   reconcileNotifications(runtime, projection());
   const silenced = projection();
   silenced.targets[0].encounter.silenced = true;
@@ -407,7 +407,7 @@ test("silencing an active target clears its notification", () => {
   );
   assert.equal(clears.length, 1);
   assertResolvedClear(clears[0], {
-    correlationId: "engine-correlation",
+    correlationId: "traffic-correlation",
     subjectKey: "ajrm-marine:traffic:vessel:235900004",
     timestamp: "2026-06-20T08:03:00.000Z",
   });

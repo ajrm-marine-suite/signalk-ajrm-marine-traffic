@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.9
+
+- Finish renaming remaining legacy traffic-core and engine terminology to AJRM Marine Traffic, including public projection mode values and diagnostics.
+
 ## 0.5.8
 
 - Rename Traffic provider, subject keys, actions, and projection contracts to AJRM Marine naming.

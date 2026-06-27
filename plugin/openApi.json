@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "AJRM Marine Traffic Core API",
+    "title": "AJRM Marine AJRM Marine Traffic API",
     "version": "0.5.6",
-    "description": "Authoritative Traffic Core capability, target, Auto Profile, Audio Policy, and command projections."
+    "description": "Authoritative AJRM Marine Traffic capability, target, Auto Profile, Audio Policy, and command projections."
   },
   "servers": [
     {
@@ -13,17 +13,17 @@
   "paths": {
     "/status": {
       "get": {
-        "summary": "Get Traffic Core capability, target and policy projections",
+        "summary": "Get AJRM Marine Traffic capability, target and policy projections",
         "responses": {
           "200": {
-            "description": "Current Traffic Core capability, target, and policy state"
+            "description": "Current AJRM Marine Traffic capability, target, and policy state"
           }
         }
       }
     },
     "/commands": {
       "get": {
-        "summary": "Get Traffic Core command capability and runtime state",
+        "summary": "Get AJRM Marine Traffic command capability and runtime state",
         "responses": {
           "200": {
             "description": "Current command state"
@@ -33,7 +33,7 @@
     },
     "/commands/profile": {
       "put": {
-        "summary": "Select the authoritative Traffic Core profile",
+        "summary": "Select the authoritative AJRM Marine Traffic profile",
         "responses": {
           "200": {
             "description": "Profile selected"
@@ -43,7 +43,7 @@
     },
     "/commands/profiles": {
       "get": {
-        "summary": "Get Traffic Core profile sensitivity settings",
+        "summary": "Get AJRM Marine Traffic profile sensitivity settings",
         "responses": {
           "200": {
             "description": "Current per-profile sensitivity settings"
@@ -51,7 +51,7 @@
         }
       },
       "put": {
-        "summary": "Update Traffic Core profile sensitivity settings",
+        "summary": "Update AJRM Marine Traffic profile sensitivity settings",
         "responses": {
           "200": {
             "description": "Profile sensitivity settings saved"
@@ -61,7 +61,7 @@
     },
     "/commands/targets/{identity}/silence": {
       "post": {
-        "summary": "Silence or unsilence one Traffic Core target",
+        "summary": "Silence or unsilence one AJRM Marine Traffic target",
         "parameters": [
           {
             "name": "identity",

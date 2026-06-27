@@ -121,10 +121,10 @@ async function refresh() {
   try {
     snapshot = await jsonRequest(STATUS_PATH);
     render();
-    els.status.textContent = "Traffic Core status received.";
+    els.status.textContent = "AJRM Marine Traffic status received.";
     els.status.className = "status ok";
   } catch (error) {
-    els.status.textContent = `Traffic Core unavailable: ${error.message}`;
+    els.status.textContent = `AJRM Marine Traffic unavailable: ${error.message}`;
     els.status.className = "status warning";
   } finally {
     els.refresh.disabled = false;
@@ -225,7 +225,7 @@ function renderProfileEditor(enabled) {
   }
   els.profileStatus.textContent = profilesDirty
     ? "Profile changes are not saved yet."
-    : "Profile settings loaded from Traffic Core.";
+    : "Profile settings loaded from AJRM Marine Traffic.";
 }
 
 function targetRow(target) {
@@ -350,7 +350,7 @@ els.mute.addEventListener("click", () => runCommand(async () => {
     method: "PUT",
     body: JSON.stringify({ muted }),
   });
-  return muted ? "Traffic Core audio muted." : "Traffic Core audio enabled.";
+  return muted ? "AJRM Marine Traffic audio muted." : "AJRM Marine Traffic audio enabled.";
 }));
 els.automuteStationary.addEventListener("change", () => saveAudioPolicy());
 els.automuteSpeed.addEventListener("change", () => saveAudioPolicy());

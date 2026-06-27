@@ -56,7 +56,7 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
     const correlationId =
       target.encounter.correlationId || previous?.correlationId || randomUUID();
     const level = priorityLevel(state);
-    const eventId = `engine-collision-${sanitizePathSegment(identity)}-${runtime.sourceSequence}`;
+    const eventId = `traffic-collision-${sanitizePathSegment(identity)}-${runtime.sourceSequence}`;
     const isVisualRevision = previous?.state === state;
     const methods =
       isVisualRevision || state === "alert" ? ["visual"] : ["visual", "sound"];
@@ -164,10 +164,10 @@ function systemEventNotification(runtime, event = {}, now = new Date().toISOStri
   const nowMs = Date.parse(now) || Date.now();
   runtime.revision = Math.max(runtime.revision + 1, nowMs);
   const key = sanitizePathSegment(event.key || event.label || "system");
-  const eventId = `engine-system-${key}-${runtime.sourceSequence}`;
+  const eventId = `traffic-system-${key}-${runtime.sourceSequence}`;
   const subjectKey = `ajrm-marine:traffic:system:${key}`;
   const message = String(event.message || "");
-  const title = String(event.title || "Traffic Core");
+  const title = String(event.title || "AJRM Marine Traffic");
   const label = String(event.label || "System");
   const category = String(event.category || "system");
   const audio = event.audio !== false;
@@ -237,7 +237,7 @@ function clearIfActive(runtime, path, outputs, now = new Date().toISOString()) {
   outputs.push({
     path,
     value: {
-      id: previous.eventId || `engine-clear-${sanitizePathSegment(previous.identity)}`,
+      id: previous.eventId || `traffic-clear-${sanitizePathSegment(previous.identity)}`,
       state: "normal",
       method: [],
       message: "",
@@ -255,7 +255,7 @@ function clearIfActive(runtime, path, outputs, now = new Date().toISOString()) {
           subjectKey:
             previous.subjectKey || `ajrm-marine:traffic:vessel:${previous.identity || "unknown"}`,
           eventId:
-            previous.eventId || `engine-clear-${sanitizePathSegment(previous.identity)}`,
+            previous.eventId || `traffic-clear-${sanitizePathSegment(previous.identity)}`,
           revision: runtime.revision,
           lifecycle: "resolved",
           timestamp: now,

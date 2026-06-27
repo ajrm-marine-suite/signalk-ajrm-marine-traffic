@@ -7,7 +7,7 @@ const {
   autoProfilePublicationSignature,
 } = require("../plugin")._private;
 
-test("installable Traffic Core is disabled by default and authoritative when enabled", () => {
+test("installable AJRM Marine Traffic is disabled by default and authoritative when enabled", () => {
   const packageInfo = require("../package.json");
   assert.equal(packageInfo.private, undefined);
   assert.equal(packageInfo["signalk-plugin-enabled-by-default"], false);
@@ -15,7 +15,7 @@ test("installable Traffic Core is disabled by default and authoritative when ena
   assert.equal(plugin.schema.properties.mode, undefined);
 });
 
-test("Traffic Core publishes authoritative notifications and clears them on stop", async () => {
+test("AJRM Marine Traffic publishes authoritative notifications and clears them on stop", async () => {
   const timestamp = new Date().toISOString();
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
@@ -73,7 +73,7 @@ test("Traffic Core publishes authoritative notifications and clears them on stop
   assert.equal(clear.data.ajrmMarineNotifications.delivery.audio, false);
 });
 
-test("Traffic Core suppresses notifications during Logger replay warm-up", async () => {
+test("AJRM Marine Traffic suppresses notifications during Logger replay warm-up", async () => {
   const timestamp = new Date().toISOString();
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
@@ -141,7 +141,7 @@ test("Traffic Core suppresses notifications during Logger replay warm-up", async
   plugin.stop();
 });
 
-test("Traffic Core uses Signal K distance display units for encounter wording", async () => {
+test("AJRM Marine Traffic uses Signal K distance display units for encounter wording", async () => {
   const timestamp = new Date().toISOString();
   const fixture = fakeApp({
     metadata: {
@@ -190,7 +190,7 @@ test("Traffic Core uses Signal K distance display units for encounter wording", 
   plugin.stop();
 });
 
-test("Traffic Core publishes authoritative target projections", async () => {
+test("AJRM Marine Traffic publishes authoritative target projections", async () => {
   const timestamp = new Date().toISOString();
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
@@ -232,7 +232,7 @@ test("Traffic Core publishes authoritative target projections", async () => {
     .flatMap((message) => message.updates.flatMap((update) => update.values))
     .filter((value) => value.path === "plugins.ajrmMarineTraffic.targets")
     .at(-1).value;
-  assert.equal(targetProjection.mode, "engine");
+  assert.equal(targetProjection.mode, "traffic");
   assert.equal(targetProjection.authoritative, true);
   assert.equal(targetProjection.targets.length, 1);
   plugin.stop();
@@ -268,7 +268,7 @@ test("live full self vessel context is normalized to own-vessel input", async ()
   plugin.stop();
 });
 
-test("Engine command routes own profile and target silence state", async () => {
+test("Traffic command routes own profile and target silence state", async () => {
   const timestamp = new Date().toISOString();
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
@@ -360,7 +360,7 @@ test("Engine command routes own profile and target silence state", async () => {
   plugin.stop();
 });
 
-test("Engine publishes Auto Profile and Audio Policy contracts and accepts commands", async () => {
+test("Traffic publishes Auto Profile and Audio Policy contracts and accepts commands", async () => {
   const fixture = fakeApp({
     regions: {
       oban: {
@@ -466,7 +466,7 @@ test("Engine publishes Auto Profile and Audio Policy contracts and accepts comma
   plugin.stop();
 });
 
-test("Engine does not republish Auto Profile for nearest-distance drift", async () => {
+test("Traffic does not republish Auto Profile for nearest-distance drift", async () => {
   const fixture = fakeApp({
     regions: {
       oban: {
@@ -560,7 +560,7 @@ test("Auto Profile publication signature ignores refresh-only harbour metadata",
   );
 });
 
-test("Engine does not announce outside profile while harbour regions are loading", async () => {
+test("Traffic does not announce outside profile while harbour regions are loading", async () => {
   const fixture = fakeApp({
     resourceDelayMs: 25,
     regions: {
@@ -633,7 +633,7 @@ test("Engine does not announce outside profile while harbour regions are loading
   plugin.stop();
 });
 
-test("Engine queues deltas until harbour startup readiness completes", async () => {
+test("Traffic queues deltas until harbour startup readiness completes", async () => {
   const fixture = fakeApp({
     resourceDelayMs: 25,
     regions: {
@@ -696,11 +696,11 @@ test("Engine queues deltas until harbour startup readiness completes", async () 
     ),
     true,
   );
-  assert.match(fixture.pluginStatus, /Traffic Core/);
+  assert.match(fixture.pluginStatus, /AJRM Marine Traffic/);
   plugin.stop();
 });
 
-test("Engine flags harbour startup timeout without selecting outside profile", async () => {
+test("Traffic flags harbour startup timeout without selecting outside profile", async () => {
   const fixture = fakeApp({
     resourceDelayMs: 50,
     regions: {
@@ -763,7 +763,7 @@ test("Engine flags harbour startup timeout without selecting outside profile", a
   plugin.stop();
 });
 
-test("Engine persists auto-selected profile to avoid restart repeats", async () => {
+test("Traffic persists auto-selected profile to avoid restart repeats", async () => {
   const fixture = fakeApp({
     regions: {
       oban: {
@@ -854,7 +854,7 @@ test("Engine persists auto-selected profile to avoid restart repeats", async () 
   secondPlugin.stop();
 });
 
-test("Engine does not announce auto-unmute on first moving sample", async () => {
+test("Traffic does not announce auto-unmute on first moving sample", async () => {
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
   plugin.start({
@@ -892,7 +892,7 @@ test("Engine does not announce auto-unmute on first moving sample", async () => 
   plugin.stop();
 });
 
-test("Engine does not auto-unmute a manual mute on restart while moving", async () => {
+test("Traffic does not auto-unmute a manual mute on restart while moving", async () => {
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
   plugin.start({
@@ -935,7 +935,7 @@ test("Engine does not auto-unmute a manual mute on restart while moving", async 
   plugin.stop();
 });
 
-test("Engine does not persist runtime stationary automute as manual mute", async () => {
+test("Traffic does not persist runtime stationary automute as manual mute", async () => {
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
   plugin.start({
@@ -978,7 +978,7 @@ test("Engine does not persist runtime stationary automute as manual mute", async
   plugin.stop();
 });
 
-test("Traffic Core emits All's well after quiet period when enabled", async () => {
+test("AJRM Marine Traffic emits All's well after quiet period when enabled", async () => {
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
   const originalNow = Date.now;
@@ -1046,7 +1046,7 @@ test("Traffic Core emits All's well after quiet period when enabled", async () =
   );
 });
 
-test("Traffic Core accepts safety-affecting commands when enabled", () => {
+test("AJRM Marine Traffic accepts safety-affecting commands when enabled", () => {
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
   const router = fakeRouter();

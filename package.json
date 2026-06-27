@@ -1,7 +1,7 @@
 {
   "name": "signalk-ajrm-marine-traffic",
-  "version": "0.5.8",
-  "description": "AIS and traffic decision engine for the AJRM Marine Suite.",
+  "version": "0.5.9",
+  "description": "AIS and traffic decision service for the AJRM Marine Suite.",
   "main": "plugin/index.js",
   "scripts": {
     "test": "node --test \"test/**/*.test.js\" && node --check plugin/index.js && node --check public/app.js && node --check scripts/replay-capture.js",

@@ -15,9 +15,9 @@ function delta(context, values, timestamp = "2026-06-19T15:30:00.000Z") {
   return { context, updates: [{ timestamp, values }] };
 }
 
-test("Traffic Core creates a versioned authoritative target projection", () => {
+test("AJRM Marine Traffic creates a versioned authoritative target projection", () => {
   const state = createTrafficCore({
-    sessionId: "engine-session",
+    sessionId: "traffic-session",
     profile: "coastal",
   });
   ingestDelta(
@@ -48,16 +48,16 @@ test("Traffic Core creates a versioned authoritative target projection", () => {
     "2026-06-19T15:30:01.000Z",
   );
   assert.equal(projection.contract, "ajrm-marine-traffic-targets");
-  assert.equal(projection.sessionId, "engine-session");
+  assert.equal(projection.sessionId, "traffic-session");
   assert.equal(projection.sequence, 1);
-  assert.equal(projection.mode, "engine");
+  assert.equal(projection.mode, "traffic");
   assert.equal(projection.authoritative, true);
   assert.equal(projection.targets.length, 1);
   assert.equal(projection.targets[0].name, "Ferry Alpha");
   assert.ok(projection.targets[0].encounter.correlationId);
 });
 
-test("Traffic Core uses heading before COG for clock-relative bearings", () => {
+test("AJRM Marine Traffic uses heading before COG for clock-relative bearings", () => {
   const state = createTrafficCore({
     sessionId: "heading-session",
     profile: "coastal",
@@ -207,7 +207,7 @@ test("AIS base stations and aids to navigation remain visible but non-collision"
   assert.equal(target.encounter.cpa, null);
 });
 
-test("closest approach input from other apps is ignored as Traffic Core authority", () => {
+test("closest approach input from other apps is ignored as AJRM Marine Traffic authority", () => {
   const timestamp = "2026-06-20T06:00:00.000Z";
   const state = createTrafficCore({ sessionId: "authority-session" });
   const context = "vessels.urn:mrn:imo:mmsi:235900004";
@@ -239,7 +239,7 @@ test("closest approach input from other apps is ignored as Traffic Core authorit
   assert.equal(target.comparison, undefined);
 });
 
-test("profile and target silence commands update Engine projection state", () => {
+test("profile and target silence commands update Traffic projection state", () => {
   const timestamp = "2026-06-20T08:00:00.000Z";
   const state = createTrafficCore({
     sessionId: "command-session",
@@ -279,7 +279,7 @@ test("unsupported profiles and missing silence targets are rejected", () => {
   assert.equal(setTargetSilenced(state, "missing", true), null);
 });
 
-test("profile sensitivity multipliers change Engine CPA and TCPA evaluation", () => {
+test("profile sensitivity multipliers change Traffic CPA and TCPA evaluation", () => {
   const state = createTrafficCore({
     sessionId: "sensitivity-session",
     profile: "coastal",
@@ -312,7 +312,7 @@ test("profile sensitivity multipliers change Engine CPA and TCPA evaluation", ()
   assert.equal(target.encounter.state, "normal");
 });
 
-test("Display-style NM CPA thresholds are normalized before Engine evaluation", () => {
+test("Display-style NM CPA thresholds are normalized before Traffic evaluation", () => {
   const state = createTrafficCore({
     sessionId: "nm-profile-session",
     profile: "offshore",
@@ -420,7 +420,7 @@ test("anchor top-level CPA thresholds are used when stale by-size CPA is zero", 
   assert.equal(target.encounter.state, "alarm");
 });
 
-test("profile per-size thresholds change Engine CPA and TCPA evaluation", () => {
+test("profile per-size thresholds change Traffic CPA and TCPA evaluation", () => {
   const state = createTrafficCore({
     sessionId: "threshold-session",
     profile: "coastal",

@@ -17,7 +17,7 @@ reassurance by default on fresh installs, while preserving explicit off
 settings. Anchor and Harbour default to automute while stationary; Coastal and
 Offshore default to keeping audio enabled.
 
-Status: installable simulator-test Traffic Core. It is disabled by default; when
+Status: installable simulator-test AJRM Marine Traffic. It is disabled by default; when
 enabled it is the authoritative AIS traffic provider for target projections,
 standard Signal K collision notifications, profile commands, Auto Profile,
 audio-policy commands, and target silence controls.
@@ -25,12 +25,12 @@ audio-policy commands, and target silence controls.
 The package includes its own **AJRM Marine Traffic** administration webapp for
 health, session/sequence diagnostics, Auto Profile selection, mute/automute
 policy, and silence controls. Other displays such as Freeboard-SK, KIP, or
-third-party Signal K clients can use the Traffic Core without installing
+third-party Signal K clients can use the AJRM Marine Traffic without installing
 AJRM Marine Display.
 
 ## Purpose
 
-The Traffic Core owns:
+The AJRM Marine Traffic owns:
 
 - AIS and own-vessel ingestion;
 - normalized target state and data health;
@@ -76,19 +76,19 @@ Version `0.8.9` stops the live refresh loop from overwriting focused Audio
 Policy text/number fields, so the All's well quiet period can be typed
 manually without snapping back to the previous value.
 
-Version `0.8.8` clarifies the Traffic Core Audio Policy webapp layout: the
+Version `0.8.8` clarifies the AJRM Marine Traffic Audio Policy webapp layout: the
 current mute/automute status appears directly under the Audio Policy heading,
 the policy button is labelled Enable audio / Mute audio, and All's well
 reassurance settings sit on their own line.
 
-Version `0.8.7` exposes All's well reassurance controls in the Traffic Core
+Version `0.8.7` exposes All's well reassurance controls in the AJRM Marine Traffic
 Audio Policy webapp section, publishes those settings in the Audio Policy
-projection, and emits the reassurance as a Traffic Core system event after the
+projection, and emits the reassurance as a AJRM Marine Traffic system event after the
 configured quiet period when sound is enabled, GPS is fresh, and no traffic
 alert is active.
 
 Version `0.8.4` accepts Display/legacy profile CPA thresholds saved in nautical
-miles and normalizes them to metres for Engine evaluation. It also falls back to
+miles and normalizes them to metres for Traffic evaluation. It also falls back to
 the configured outside profile when Auto Profile is enabled but Signal K harbour
 region resources are unavailable.
 
@@ -103,7 +103,7 @@ Version `0.8.2` independently ingests standard Signal K vessel data and:
 - marks AJRM Marine Logger replay explicitly;
 - publishes standard collision notifications with Notifications Plus session,
   sequence, and correlation metadata;
-- clears Traffic Core notifications on de-escalation, target loss, stale
+- clears AJRM Marine Traffic notifications on de-escalation, target loss, stale
   own-vessel position, plugin stop, or restart;
 - refreshes late vessel names and changing encounter details as throttled
   visual-only revisions, retaining correlation without replaying audio;
@@ -114,11 +114,11 @@ Version `0.8.2` independently ingests standard Signal K vessel data and:
 - owns global mute and stationary automute policy, with manual override,
   debounced stationary entry, and immediate automatic unmute on movement;
 - publishes versioned `autoProfile`, `audioPolicy`, and `profiles` projections
-  carrying Traffic Core session and monotonic sequence metadata;
+  carrying AJRM Marine Traffic session and monotonic sequence metadata;
 - publishes GPS received, Auto Profile selection, and stationary auto-mute /
   auto-unmute as one-shot Notifications Plus system events so Companion Recent
   Activity and Audio receive the operational timeline;
-- exposes policy controls and the full profile limit editor in the Traffic Core
+- exposes policy controls and the full profile limit editor in the AJRM Marine Traffic
   administration webapp and persists them through Signal K plugin options.
   Target silence deliberately resets when Signal K or the plugin restarts.
 
@@ -165,7 +165,7 @@ status refresh loop and applies them when the field changes or Enter is pressed.
 reassurance controls from mute/automute controls.
 
 `v0.5.0` adds visible All's well reassurance settings to AJRM Marine Traffic:
-enabled/disabled, phrase, and quiet-period minutes. Traffic Core emits the
+enabled/disabled, phrase, and quiet-period minutes. AJRM Marine Traffic emits the
 reassurance as a normal Notifications Plus system event only after the quiet
 period while unmuted, GPS-fresh, and free of active traffic alerts.
 
@@ -180,20 +180,20 @@ for compatibility.
 
 `v0.5.0` publishes GPS received, Auto Profile selection, and stationary
 auto-mute / auto-unmute transitions as one-shot Notifications Plus history
-events. AJRM Marine Companion Recent Activity now shows those Traffic Core state
+events. AJRM Marine Companion Recent Activity now shows those AJRM Marine Traffic state
 changes instead of only collision alerts.
 
 `v0.5.0` publishes explicit resolved/normal notification envelopes when Traffic
 Core clears an alert, preventing stale active Notifications Plus data from
 leaking through Signal K API consumers after CPA/TCPA danger has passed.
 
-`v0.5.0` added the authoritative Traffic Core profile editor for CPA/TCPA/speed
-limits and sensitivity multipliers, while keeping Traffic Core authoritative for
+`v0.5.0` added the authoritative AJRM Marine Traffic profile editor for CPA/TCPA/speed
+limits and sensitivity multipliers, while keeping AJRM Marine Traffic authoritative for
 Auto Profile, audio mute/automute policy, and collision notifications.
 
 
 ## Public Beta
 
-AIS and traffic decision engine for the AJRM Marine Suite.
+AIS and traffic decision service for the AJRM Marine Suite.
 
 Development assistance: OpenAI Codex helped with code generation, refactoring, and automated testing during the beta development cycle.

@@ -1,6 +1,6 @@
 # AJRM Marine Logger replay
 
-AJRM Marine Logger replay remains the fastest way to smoke-test Traffic Core
+AJRM Marine Logger replay remains the fastest way to smoke-test AJRM Marine Traffic
 behaviour against real or simulator traffic.
 
 Capture these paths:

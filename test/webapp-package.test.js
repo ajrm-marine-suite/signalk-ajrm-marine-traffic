@@ -6,7 +6,7 @@ const path = require("node:path");
 const test = require("node:test");
 const packageInfo = require("../package.json");
 
-test("Engine bundles its own administration webapp", () => {
+test("Traffic bundles its own administration webapp", () => {
   assert.ok(packageInfo.keywords.includes("signalk-node-server-plugin"));
   assert.ok(packageInfo.keywords.includes("signalk-webapp"));
   assert.ok(packageInfo.files.includes("public"));

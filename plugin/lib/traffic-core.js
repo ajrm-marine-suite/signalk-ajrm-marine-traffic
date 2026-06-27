@@ -127,7 +127,7 @@ function calculateProjection(state, now = new Date().toISOString()) {
     sessionId: state.sessionId,
     sequence: state.sequence,
     generatedAt: now,
-    mode: "engine",
+    mode: "traffic",
     authoritative: true,
     profile: state.profile,
     profileSettings: {

@@ -113,7 +113,7 @@ module.exports = function ajrmMarineTraffic(app) {
         type: "object",
         title: "Per-profile Traffic settings",
         description:
-          "Traffic Core CPA, TCPA, repeat sensitivity, and stationary automute settings for each sailing profile.",
+          "AJRM Marine Traffic CPA, TCPA, repeat sensitivity, and stationary automute settings for each sailing profile.",
       },
       autoProfile: {
         type: "object",
@@ -228,7 +228,7 @@ module.exports = function ajrmMarineTraffic(app) {
     publish();
     app.setPluginStatus(`${statusText()}; starting Auto Profile`);
     startHarbourSubsystem(generation);
-    debug("engine.starting", {
+    debug("traffic.starting", {
       sessionId: state.sessionId,
       sequence: projection.sequence,
       profile: options.profile,
@@ -288,7 +288,7 @@ module.exports = function ajrmMarineTraffic(app) {
     router.post("/commands/unsilence-all", (_req, res) => {
       const unsilenced = unsilenceAllTargets(state);
       recalculate();
-      debug("engine.command.unsilence-all", {
+      debug("traffic.command.unsilence-all", {
         sessionId: state.sessionId,
         sequence: projection.sequence,
         unsilenced,
@@ -415,7 +415,7 @@ module.exports = function ajrmMarineTraffic(app) {
       );
     }
     for (const target of projection.targets) {
-      debug("engine.target", {
+      debug("traffic.target", {
         sessionId: state.sessionId,
         sequence: projection.sequence,
         correlationId: target.encounter.correlationId,
@@ -447,7 +447,7 @@ module.exports = function ajrmMarineTraffic(app) {
 
   function publishValue(path, value) {
     if (!path.startsWith(ALLOWED_OUTPUT_PREFIX)) {
-      throw new Error(`Traffic Core blocked unsafe output path: ${path}`);
+      throw new Error(`AJRM Marine Traffic blocked unsafe output path: ${path}`);
     }
     app.handleMessage(PLUGIN_ID, {
       context: "vessels.self",
@@ -458,13 +458,13 @@ module.exports = function ajrmMarineTraffic(app) {
   function publishNotifications(outputs) {
     for (const output of outputs) {
       if (!output.path.startsWith("notifications.")) {
-        throw new Error(`Engine blocked unsafe notification path: ${output.path}`);
+        throw new Error(`AJRM Marine Traffic blocked unsafe notification path: ${output.path}`);
       }
       app.handleMessage(PLUGIN_ID, {
         context: "vessels.self",
         updates: [{ values: [output] }],
       });
-      debug(output.value === null ? "engine.notification.clear" : "engine.notification.publish", {
+      debug(output.value === null ? "traffic.notification.clear" : "traffic.notification.publish", {
         sessionId: state.sessionId,
         sequence: projection?.sequence,
         correlationId:
@@ -511,7 +511,7 @@ module.exports = function ajrmMarineTraffic(app) {
       contract: "ajrm-marine-traffic-capabilities",
       contractVersion: 1,
       sessionId: state.sessionId,
-      mode: "engine",
+      mode: "traffic",
       authoritative: true,
       notificationsEnabled: true,
       commandsEnabled: true,
@@ -523,7 +523,7 @@ module.exports = function ajrmMarineTraffic(app) {
   }
 
   function statusText() {
-    return `Traffic Core v${packageInfo.version}; authoritative notifications and commands enabled`;
+    return `AJRM Marine Traffic v${packageInfo.version}; authoritative notifications and commands enabled`;
   }
 
   function profileCommand(req, res) {
@@ -544,7 +544,7 @@ module.exports = function ajrmMarineTraffic(app) {
       }
       recalculate();
       persistOptions();
-      debug("engine.command.profile", {
+      debug("traffic.command.profile", {
         sessionId: state.sessionId,
         sequence: projection.sequence,
         profile,
@@ -566,7 +566,7 @@ module.exports = function ajrmMarineTraffic(app) {
       });
       recalculate();
       persistOptions();
-      debug("engine.command.profiles", {
+      debug("traffic.command.profiles", {
         sessionId: state.sessionId,
         sequence: projection.sequence,
         profile: state.profile,
@@ -625,7 +625,7 @@ module.exports = function ajrmMarineTraffic(app) {
       return;
     }
     recalculate();
-    debug("engine.command.silence", {
+    debug("traffic.command.silence", {
       sessionId: state.sessionId,
       sequence: projection.sequence,
       target: target.mmsi || target.id,
@@ -673,7 +673,7 @@ module.exports = function ajrmMarineTraffic(app) {
       },
       (error) => {
         if (error) {
-          app.error(`[${PLUGIN_ID}] unable to save Traffic Core settings: ${error.message || error}`);
+          app.error(`[${PLUGIN_ID}] unable to save AJRM Marine Traffic settings: ${error.message || error}`);
         }
       },
     );
@@ -712,7 +712,7 @@ module.exports = function ajrmMarineTraffic(app) {
           now,
         ),
       );
-      debug("engine.auto-profile.change", {
+      debug("traffic.auto-profile.change", {
         sessionId: state.sessionId,
         profile: state.profile,
         region: autoProfileState.nearestRegionName,
@@ -745,7 +745,7 @@ module.exports = function ajrmMarineTraffic(app) {
           ),
         );
       }
-      debug("engine.audio-policy.change", {
+      debug("traffic.audio-policy.change", {
         sessionId: state.sessionId,
         profile: state.profile,
         muted: audioPolicy.muted,
@@ -814,7 +814,7 @@ module.exports = function ajrmMarineTraffic(app) {
         ? `Timed out after ${Math.round(options.startupHarbourTimeoutMs / 1000)} seconds waiting for harbour regions.`
         : error.message;
       autoProfileState.lastError = message;
-      debug("engine.auto-profile.startup-error", {
+      debug("traffic.auto-profile.startup-error", {
         sessionId: state.sessionId,
         error: message,
       });
@@ -834,7 +834,7 @@ module.exports = function ajrmMarineTraffic(app) {
         ? `${statusText()}; Auto Profile startup degraded: ${autoProfileState.lastError}`
         : statusText(),
     );
-    debug("engine.start", {
+    debug("traffic.start", {
       sessionId: state.sessionId,
       sequence: projection.sequence,
       profile: options.profile,
@@ -872,7 +872,7 @@ module.exports = function ajrmMarineTraffic(app) {
       return regions;
     } catch (error) {
       autoProfileState.lastError = error.message;
-      debug("engine.auto-profile.regions-error", {
+      debug("traffic.auto-profile.regions-error", {
         sessionId: state.sessionId,
         error: error.message,
       });
@@ -934,7 +934,7 @@ module.exports = function ajrmMarineTraffic(app) {
       sessionId: state.sessionId,
       sequence: audioPolicySequence,
       correlationId: audioPolicy.correlationId,
-      mode: "engine",
+      mode: "traffic",
       authoritative: true,
       profile: state.profile,
       ownSog: state.own.sog,

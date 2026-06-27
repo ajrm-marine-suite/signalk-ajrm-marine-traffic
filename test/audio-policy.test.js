@@ -145,10 +145,10 @@ test("Audio Policy projection carries session, sequence and correlation", () => 
     allWellIntervalMinutes: 45,
   });
   const projection = audioPolicyProjection({
-    sessionId: "engine-session",
+    sessionId: "traffic-session",
     sequence: 4,
     correlationId: "mute-transition",
-    mode: "engine",
+    mode: "traffic",
     authoritative: true,
     profile: "harbor",
     ownSog: 0,
@@ -156,7 +156,7 @@ test("Audio Policy projection carries session, sequence and correlation", () => 
     generatedAt: "2026-06-20T12:00:00.000Z",
   });
   assert.equal(projection.contract, "ajrm-marine-traffic-audio-policy");
-  assert.equal(projection.sessionId, "engine-session");
+  assert.equal(projection.sessionId, "traffic-session");
   assert.equal(projection.sequence, 4);
   assert.equal(projection.correlationId, "mute-transition");
   assert.equal(projection.authoritative, true);
