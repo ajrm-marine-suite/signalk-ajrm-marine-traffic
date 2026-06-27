@@ -30,6 +30,7 @@ function createTrafficCore(options = {}) {
     correlations: new Map(),
     silencedTargets: new Set(),
     ajrmMarineLoggerPlayback: false,
+    ajrmMarineLoggerPlaybackWarmup: false,
     ownPositionMaxAgeSeconds: finiteOrDefault(
       options.ownPositionMaxAgeSeconds,
       30,
@@ -45,8 +46,12 @@ function ingestDelta(state, delta) {
     for (const item of update.values || []) {
       if (item.path === "plugins.ajrmMarineLogger.playback") {
         const next = item.value === true || item.value?.active === true;
-        changed = next !== state.ajrmMarineLoggerPlayback || changed;
+        const nextWarmup = item.value?.warmupActive === true;
+        changed = next !== state.ajrmMarineLoggerPlayback
+          || nextWarmup !== state.ajrmMarineLoggerPlaybackWarmup
+          || changed;
         state.ajrmMarineLoggerPlayback = next;
+        state.ajrmMarineLoggerPlaybackWarmup = nextWarmup;
         continue;
       }
       const isSelf =
@@ -131,6 +136,7 @@ function calculateProjection(state, now = new Date().toISOString()) {
     },
     source: {
       ajrmMarineLoggerPlayback: state.ajrmMarineLoggerPlayback,
+      ajrmMarineLoggerPlaybackWarmup: state.ajrmMarineLoggerPlaybackWarmup,
       ownVesselPositionFresh,
       ownVesselPositionAgeMs: ageMs(state.own.positionUpdatedAt, now),
       ownVesselPositionMaxAgeSeconds: state.ownPositionMaxAgeSeconds,

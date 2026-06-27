@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.7
+
+- Track Logger replay warm-up separately from active replay, and suppress Traffic notifications while warm-up is active so replay can prime AIS state without speaking pre-voyage alerts.
+
 ## 0.5.6
 
 - Use top-level Anchor CPA/TCPA thresholds when stale per-size CPA entries are zero, so edited anchorage guard settings affect collision evaluation.

@@ -73,6 +73,74 @@ test("Traffic Core publishes authoritative notifications and clears them on stop
   assert.equal(clear.data.ajrmMarineNotifications.delivery.audio, false);
 });
 
+test("Traffic Core suppresses notifications during Logger replay warm-up", async () => {
+  const timestamp = new Date().toISOString();
+  const fixture = fakeApp();
+  const plugin = createPlugin(fixture.app);
+  plugin.start({ calculationDelayMs: 0, profile: "coastal" });
+
+  fixture.deltaHandler({
+    context: fixture.app.selfId,
+    updates: [
+      {
+        timestamp,
+        values: [
+          {
+            path: "plugins.ajrmMarineLogger.playback",
+            value: { active: true, warmupActive: true },
+          },
+          { path: "navigation.position", value: { latitude: 50, longitude: -1 } },
+          { path: "navigation.speedOverGround", value: 8 },
+          { path: "navigation.courseOverGroundTrue", value: 0 },
+        ],
+      },
+    ],
+  });
+  fixture.deltaHandler({
+    context: "vessels.urn:mrn:imo:mmsi:235900004",
+    updates: [
+      {
+        timestamp,
+        values: [
+          { path: "mmsi", value: "235900004" },
+          { path: "name", value: "Ferry Alpha" },
+          { path: "navigation.position", value: { latitude: 50.01, longitude: -1 } },
+          { path: "navigation.speedOverGround", value: 8 },
+          { path: "navigation.courseOverGroundTrue", value: Math.PI },
+          { path: "design.length", value: { overall: 120 } },
+        ],
+      },
+    ],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  let notificationValues = fixture.messages
+    .flatMap((message) => message.updates.flatMap((update) => update.values))
+    .filter((value) => value.path === "notifications.collision.235900004");
+  assert.equal(notificationValues.length, 0);
+
+  fixture.deltaHandler({
+    context: fixture.app.selfId,
+    updates: [
+      {
+        timestamp,
+        values: [
+          {
+            path: "plugins.ajrmMarineLogger.playback",
+            value: { active: true, warmupActive: false },
+          },
+        ],
+      },
+    ],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  notificationValues = fixture.messages
+    .flatMap((message) => message.updates.flatMap((update) => update.values))
+    .filter((value) => value.path === "notifications.collision.235900004");
+  assert.equal(notificationValues.length, 1);
+  assert.equal(notificationValues[0].value.state, "alarm");
+  plugin.stop();
+});
+
 test("Traffic Core uses Signal K distance display units for encounter wording", async () => {
   const timestamp = new Date().toISOString();
   const fixture = fakeApp({

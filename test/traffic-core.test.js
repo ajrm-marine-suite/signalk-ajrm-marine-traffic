@@ -100,10 +100,15 @@ test("CapturePlus replay is explicit in the projection", () => {
   ingestDelta(
     state,
     delta("vessels.self", [
-      { path: "plugins.ajrmMarineLogger.playback", value: true },
+      {
+        path: "plugins.ajrmMarineLogger.playback",
+        value: { active: true, warmupActive: true },
+      },
     ]),
   );
-  assert.equal(calculateProjection(state).source.ajrmMarineLoggerPlayback, true);
+  const source = calculateProjection(state).source;
+  assert.equal(source.ajrmMarineLoggerPlayback, true);
+  assert.equal(source.ajrmMarineLoggerPlaybackWarmup, true);
 });
 
 test("stale own-vessel positions are not treated as fresh calculation input", () => {

@@ -369,19 +369,22 @@ module.exports = function ajrmMarineTraffic(app) {
     const now = new Date(Date.now()).toISOString();
     const previousOwnPositionFresh =
       projection?.source?.ownVesselPositionFresh === true;
-    const systemNotifications = applyPolicies(now);
+    const suppressReplayWarmupNotifications = state.ajrmMarineLoggerPlaybackWarmup === true;
+    const systemNotifications = suppressReplayWarmupNotifications ? [] : applyPolicies(now);
     projection = calculateProjection(state, now);
-    const allWellNotification = maybeAllWellNotification(now);
+    const allWellNotification = suppressReplayWarmupNotifications
+      ? null
+      : maybeAllWellNotification(now);
     if (allWellNotification) systemNotifications.push(allWellNotification);
     publish();
     notificationPublisher.distanceUnit = preferredDistanceUnit();
     notificationPublisher.muteState = audioPolicy.muted;
     const ownPositionFresh = projection.source.ownVesselPositionFresh === true;
     const nowMs = Date.parse(now) || Date.now();
-    if (previousOwnPositionFresh && !ownPositionFresh) {
+    if (!suppressReplayWarmupNotifications && previousOwnPositionFresh && !ownPositionFresh) {
       lastOwnPositionLostAtMs = nowMs;
     }
-    if (!previousOwnPositionFresh && ownPositionFresh) {
+    if (!suppressReplayWarmupNotifications && !previousOwnPositionFresh && ownPositionFresh) {
       const outageMs =
         lastOwnPositionLostAtMs === null ? null : nowMs - lastOwnPositionLostAtMs;
       const announceRecovery =
@@ -406,9 +409,11 @@ module.exports = function ajrmMarineTraffic(app) {
       }
     }
     publishNotifications(systemNotifications);
-    publishNotifications(
-      reconcileNotifications(notificationPublisher, projection),
-    );
+    if (!suppressReplayWarmupNotifications) {
+      publishNotifications(
+        reconcileNotifications(notificationPublisher, projection),
+      );
+    }
     for (const target of projection.targets) {
       debug("engine.target", {
         sessionId: state.sessionId,
