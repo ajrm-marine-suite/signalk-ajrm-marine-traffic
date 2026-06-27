@@ -1,6 +1,6 @@
 {
   "name": "signalk-ajrm-marine-traffic",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "AIS and traffic decision engine for the AJRM Marine Suite.",
   "main": "plugin/index.js",
   "scripts": {

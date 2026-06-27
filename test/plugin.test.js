@@ -57,7 +57,7 @@ test("Traffic Core publishes authoritative notifications and clears them on stop
   assert.equal(notificationValues[0].value.state, "alarm");
   assert.equal(
     notificationValues[0].value.data.ajrmMarineNotifications.provider,
-    "ais-plus-engine",
+    "ajrm-marine-traffic",
   );
   plugin.stop();
   const afterStop = fixture.messages
@@ -68,7 +68,7 @@ test("Traffic Core publishes authoritative notifications and clears them on stop
   assert.deepEqual(clear.method, []);
   assert.equal(clear.message, "");
   assert.equal(clear.data.ajrmMarineNotifications.lifecycle, "resolved");
-  assert.equal(clear.data.ajrmMarineNotifications.provider, "ais-plus-engine");
+  assert.equal(clear.data.ajrmMarineNotifications.provider, "ajrm-marine-traffic");
   assert.equal(clear.data.ajrmMarineNotifications.delivery.visual, false);
   assert.equal(clear.data.ajrmMarineNotifications.delivery.audio, false);
 });

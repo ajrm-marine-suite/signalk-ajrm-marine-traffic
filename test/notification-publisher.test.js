@@ -50,11 +50,11 @@ test("Engine notifications are standard Signal K values with a compatible envelo
   assert.match(outputs[0].value.message, /Collision alarm/);
   assert.match(outputs[0].value.message, /CPA will be on your starboard side/);
   const envelope = outputs[0].value.data.ajrmMarineNotifications;
-  assert.equal(envelope.provider, "ais-plus-engine");
+  assert.equal(envelope.provider, "ajrm-marine-traffic");
   assert.equal(envelope.providerSessionId, "engine-session");
   assert.equal(envelope.sourceSequence, 1);
   assert.equal(envelope.correlationId, "engine-correlation");
-  assert.equal(envelope.subjectKey, "ais-plus:vessel:235900004");
+  assert.equal(envelope.subjectKey, "ajrm-marine:traffic:vessel:235900004");
   assert.equal(envelope.lifecycle, "active");
   assert.equal(envelope.priority.score, 800);
   assert.equal(envelope.delivery.audio, true);
@@ -107,7 +107,7 @@ test("Engine system events are one-shot broker history notifications", () => {
   assert.deepEqual(output.value.method, ["visual", "sound"]);
   assert.equal(output.value.message, "GPS received.");
   const envelope = output.value.data.ajrmMarineNotifications;
-  assert.equal(envelope.provider, "ais-plus-engine");
+  assert.equal(envelope.provider, "ajrm-marine-traffic");
   assert.equal(envelope.providerSessionId, "engine-session");
   assert.equal(envelope.lifecycle, "event");
   assert.equal(envelope.history.policy, "always");
@@ -318,7 +318,7 @@ function assertResolvedClear(output, expected = {}) {
   assert.equal(output.value.data.vesselName, "Ferry Alpha");
   assert.equal(output.value.data.mmsi, "235900004");
   const envelope = output.value.data.ajrmMarineNotifications;
-  assert.equal(envelope.provider, "ais-plus-engine");
+  assert.equal(envelope.provider, "ajrm-marine-traffic");
   assert.equal(envelope.providerSessionId, "engine-session");
   assert.equal(envelope.lifecycle, "resolved");
   assert.equal(envelope.priority.level, "information");
@@ -370,7 +370,7 @@ test("de-escalation to normal and target loss publish a resolved normal clear", 
   assert.equal(missing.length, 1);
   assertResolvedClear(missing[0], {
     correlationId: "engine-correlation",
-    subjectKey: "ais-plus:vessel:235900004",
+    subjectKey: "ajrm-marine:traffic:vessel:235900004",
     timestamp: "2026-06-20T08:01:00.000Z",
   });
 });
@@ -382,7 +382,7 @@ test("stopping Engine clears every active notification", () => {
   assert.equal(clears.length, 1);
   assertResolvedClear(clears[0], {
     correlationId: "engine-correlation",
-    subjectKey: "ais-plus:vessel:235900004",
+    subjectKey: "ajrm-marine:traffic:vessel:235900004",
     timestamp: "2026-06-20T08:02:00.000Z",
   });
   assert.deepEqual(clearAllNotifications(runtime), []);
@@ -408,7 +408,7 @@ test("silencing an active target clears its notification", () => {
   assert.equal(clears.length, 1);
   assertResolvedClear(clears[0], {
     correlationId: "engine-correlation",
-    subjectKey: "ais-plus:vessel:235900004",
+    subjectKey: "ajrm-marine:traffic:vessel:235900004",
     timestamp: "2026-06-20T08:03:00.000Z",
   });
 });

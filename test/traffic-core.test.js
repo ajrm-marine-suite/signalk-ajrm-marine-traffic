@@ -47,7 +47,7 @@ test("Traffic Core creates a versioned authoritative target projection", () => {
     state,
     "2026-06-19T15:30:01.000Z",
   );
-  assert.equal(projection.contract, "ais-plus-engine-targets");
+  assert.equal(projection.contract, "ajrm-marine-traffic-targets");
   assert.equal(projection.sessionId, "engine-session");
   assert.equal(projection.sequence, 1);
   assert.equal(projection.mode, "engine");
@@ -95,7 +95,7 @@ test("Traffic Core uses heading before COG for clock-relative bearings", () => {
   assert.equal(target.encounter.ownHeadingTrue, Math.PI / 2);
 });
 
-test("CapturePlus replay is explicit in the projection", () => {
+test("Logger replay is explicit in the projection", () => {
   const state = createTrafficCore({ sessionId: "replay-session" });
   ingestDelta(
     state,

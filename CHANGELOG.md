@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.8
+
+- Rename Traffic provider, subject keys, actions, and projection contracts to AJRM Marine naming.
+
 ## 0.5.7
 
 - Track Logger replay warm-up separately from active replay, and suppress Traffic notifications while warm-up is active so replay can prime AIS state without speaking pre-voyage alerts.

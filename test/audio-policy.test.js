@@ -155,7 +155,7 @@ test("Audio Policy projection carries session, sequence and correlation", () => 
     policy,
     generatedAt: "2026-06-20T12:00:00.000Z",
   });
-  assert.equal(projection.contract, "ais-plus-engine-audio-policy");
+  assert.equal(projection.contract, "ajrm-marine-traffic-audio-policy");
   assert.equal(projection.sessionId, "engine-session");
   assert.equal(projection.sequence, 4);
   assert.equal(projection.correlationId, "mute-transition");

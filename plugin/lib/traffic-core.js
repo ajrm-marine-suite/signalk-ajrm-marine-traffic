@@ -122,7 +122,7 @@ function calculateProjection(state, now = new Date().toISOString()) {
   );
   state.sequence += 1;
   return {
-    contract: "ais-plus-engine-targets",
+    contract: "ajrm-marine-traffic-targets",
     contractVersion: 1,
     sessionId: state.sessionId,
     sequence: state.sequence,

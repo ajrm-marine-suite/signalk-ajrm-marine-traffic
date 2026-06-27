@@ -52,7 +52,7 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
 
     runtime.sourceSequence += 1;
     runtime.revision = Math.max(runtime.revision + 1, nowMs);
-    const subjectKey = `ais-plus:vessel:${identity}`;
+    const subjectKey = `ajrm-marine:traffic:vessel:${identity}`;
     const correlationId =
       target.encounter.correlationId || previous?.correlationId || randomUUID();
     const level = priorityLevel(state);
@@ -76,7 +76,7 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
           targetContext: target.id || "",
           ajrmMarineNotifications: {
             schemaVersion: 1,
-            provider: "ais-plus-engine",
+            provider: "ajrm-marine-traffic",
             providerSessionId: runtime.providerSessionId,
             sourceSequence: runtime.sourceSequence,
             correlationId,
@@ -121,7 +121,7 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
               {
                 id: "silence",
                 label: "Silence",
-                command: "ais-plus-engine.silence-target",
+                command: "ajrm-marine-traffic.silence-target",
                 parameters: { mmsi: String(target.mmsi || identity) },
               },
             ],
@@ -165,7 +165,7 @@ function systemEventNotification(runtime, event = {}, now = new Date().toISOStri
   runtime.revision = Math.max(runtime.revision + 1, nowMs);
   const key = sanitizePathSegment(event.key || event.label || "system");
   const eventId = `engine-system-${key}-${runtime.sourceSequence}`;
-  const subjectKey = `ais-plus:system:${key}`;
+  const subjectKey = `ajrm-marine:traffic:system:${key}`;
   const message = String(event.message || "");
   const title = String(event.title || "Traffic Core");
   const label = String(event.label || "System");
@@ -183,7 +183,7 @@ function systemEventNotification(runtime, event = {}, now = new Date().toISOStri
         category,
         ajrmMarineNotifications: {
           schemaVersion: 1,
-          provider: "ais-plus-engine",
+          provider: "ajrm-marine-traffic",
           providerSessionId: runtime.providerSessionId,
           sourceSequence: runtime.sourceSequence,
           correlationId: event.correlationId || randomUUID(),
@@ -248,12 +248,12 @@ function clearIfActive(runtime, path, outputs, now = new Date().toISOString()) {
         mmsi: String(previous.identity || ""),
         ajrmMarineNotifications: {
           schemaVersion: 1,
-          provider: "ais-plus-engine",
+          provider: "ajrm-marine-traffic",
           providerSessionId: runtime.providerSessionId,
           sourceSequence: runtime.sourceSequence,
           correlationId: previous.correlationId || randomUUID(),
           subjectKey:
-            previous.subjectKey || `ais-plus:vessel:${previous.identity || "unknown"}`,
+            previous.subjectKey || `ajrm-marine:traffic:vessel:${previous.identity || "unknown"}`,
           eventId:
             previous.eventId || `engine-clear-${sanitizePathSegment(previous.identity)}`,
           revision: runtime.revision,

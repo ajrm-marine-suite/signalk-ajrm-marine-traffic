@@ -200,7 +200,7 @@ function autoProfileProjection({
   generatedAt = new Date().toISOString(),
 }) {
   return {
-    contract: "ais-plus-engine-auto-profile",
+    contract: "ajrm-marine-traffic-auto-profile",
     contractVersion: 1,
     sessionId,
     sequence,

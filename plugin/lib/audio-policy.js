@@ -104,7 +104,7 @@ function audioPolicyProjection({
     profileSettings,
   );
   return {
-    contract: "ais-plus-engine-audio-policy",
+    contract: "ajrm-marine-traffic-audio-policy",
     contractVersion: 1,
     sessionId,
     sequence,

@@ -508,7 +508,7 @@ module.exports = function ajrmMarineTraffic(app) {
 
   function capabilities() {
     return {
-      contract: "ais-plus-engine-capabilities",
+      contract: "ajrm-marine-traffic-capabilities",
       contractVersion: 1,
       sessionId: state.sessionId,
       mode: "engine",
@@ -636,7 +636,7 @@ module.exports = function ajrmMarineTraffic(app) {
 
   function commandState() {
     return {
-      contract: "ais-plus-engine-commands",
+      contract: "ajrm-marine-traffic-commands",
       contractVersion: 1,
       sessionId: state.sessionId,
       enabled: true,
@@ -792,7 +792,7 @@ module.exports = function ajrmMarineTraffic(app) {
 
   function currentProfiles() {
     return {
-      contract: "ais-plus-engine-profiles",
+      contract: "ajrm-marine-traffic-profiles",
       contractVersion: 1,
       sessionId: state.sessionId,
       current: state.profile,
