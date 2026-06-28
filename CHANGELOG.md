@@ -1,8 +1,12 @@
 # Changelog
 
+## 0.5.10
+
+- Replace the obsolete old Traffic keyword with current Traffic metadata.
+
 ## 0.5.9
 
-- Finish renaming remaining legacy traffic-core and engine terminology to AJRM Marine Traffic, including public projection mode values and diagnostics.
+- Finish renaming remaining legacy Traffic and engine terminology to AJRM Marine Traffic, including public projection mode values and diagnostics.
 
 ## 0.5.8
 
