@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.11
+
+- Align web asset cache keys, OpenAPI metadata, and install documentation with
+  the package version.
+
 ## 0.5.10
 
 - Replace the obsolete old Traffic keyword with current Traffic metadata.
