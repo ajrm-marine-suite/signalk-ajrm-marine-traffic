@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.12
+
+- Materialize normalized default Traffic settings on first enable so a fresh
+  install does not require a manual settings save.
+
 ## 0.5.11
 
 - Align web asset cache keys, OpenAPI metadata, and install documentation with

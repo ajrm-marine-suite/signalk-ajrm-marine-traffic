@@ -2,6 +2,10 @@
 
 Server-side collision and navigation-safety core for the AJRM Marine suite.
 
+Version `0.5.12` writes the normalized default Traffic settings on first enable
+when Signal K has not yet created a plugin config file, so a fresh install does
+not require opening settings and pressing save once.
+
 Version `0.5.6` fixes Anchor profile CPA/TCPA evaluation when top-level
 anchorage thresholds are edited and stale per-size entries still contain zero
 CPA values.
@@ -143,7 +147,7 @@ See [AJRM Marine Logger replay](docs/REPLAY.md) for the offline replay workflow.
 
 ```bash
 cd ~/.signalk
-npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.11 --omit=dev --no-package-lock
+npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.12 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 

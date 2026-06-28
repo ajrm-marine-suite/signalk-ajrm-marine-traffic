@@ -5,6 +5,7 @@ const test = require("node:test");
 const createPlugin = require("../plugin");
 const {
   autoProfilePublicationSignature,
+  shouldMaterializeDefaultOptions,
 } = require("../plugin")._private;
 
 test("installable AJRM Marine Traffic is disabled by default and authoritative when enabled", () => {
@@ -13,6 +14,29 @@ test("installable AJRM Marine Traffic is disabled by default and authoritative w
   assert.equal(packageInfo["signalk-plugin-enabled-by-default"], false);
   const plugin = createPlugin(fakeApp().app);
   assert.equal(plugin.schema.properties.mode, undefined);
+});
+
+test("AJRM Marine Traffic materializes first-run default settings once enabled", () => {
+  const fixture = fakeApp();
+  const plugin = createPlugin(fixture.app);
+  plugin.start({});
+
+  assert.equal(fixture.savedOptions.profile, "harbor");
+  assert.equal(fixture.savedOptions.calculationDelayMs, 100);
+  assert.equal(fixture.savedOptions.ownPositionMaxAgeSeconds, 30);
+  assert.equal(fixture.savedOptions.autoProfile.enabled, true);
+  assert.equal(fixture.savedOptions.automuteStationary, true);
+  assert.equal(fixture.savedOptions.allWellEnabled, true);
+  assert.equal(fixture.savedOptions.muted, false);
+  assert.equal(fixture.savedOptions.profiles.anchor.automuteStationary, true);
+  assert.equal(fixture.savedOptions.profiles.coastal.automuteStationary, false);
+  plugin.stop();
+});
+
+test("Traffic only materializes defaults for a blank first-run options object", () => {
+  assert.equal(shouldMaterializeDefaultOptions({}), true);
+  assert.equal(shouldMaterializeDefaultOptions({ profile: "harbor" }), false);
+  assert.equal(shouldMaterializeDefaultOptions(null), false);
 });
 
 test("AJRM Marine Traffic publishes authoritative notifications and clears them on stop", async () => {

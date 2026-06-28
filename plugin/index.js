@@ -224,6 +224,7 @@ module.exports = function ajrmMarineTraffic(app) {
     startupQueue = [];
     const generation = (startupGeneration += 1);
     projection = calculateProjection(state);
+    if (shouldMaterializeDefaultOptions(pluginOptions)) persistOptions();
     subscribe();
     publish();
     app.setPluginStatus(`${statusText()}; starting Auto Profile`);
@@ -1018,6 +1019,15 @@ function normalizeOptions(value) {
   };
 }
 
+function shouldMaterializeDefaultOptions(value) {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.keys(value).length === 0
+  );
+}
+
 module.exports.ALLOWED_OUTPUT_PREFIX = ALLOWED_OUTPUT_PREFIX;
 module.exports.CAPABILITIES_PATH = CAPABILITIES_PATH;
 module.exports.TARGETS_PATH = TARGETS_PATH;
@@ -1026,4 +1036,5 @@ module.exports.AUDIO_POLICY_PATH = AUDIO_POLICY_PATH;
 module.exports.PROFILES_PATH = PROFILES_PATH;
 module.exports._private = {
   autoProfilePublicationSignature,
+  shouldMaterializeDefaultOptions,
 };
