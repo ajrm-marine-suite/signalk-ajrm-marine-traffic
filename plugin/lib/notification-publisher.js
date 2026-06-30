@@ -482,8 +482,12 @@ function normalizeDistanceUnit(unit) {
 }
 
 function timeText(seconds) {
-  if (seconds < 90) return `${Math.max(1, Math.round(seconds))} seconds`;
-  return `${Math.max(1, Math.round(seconds / 60))} minutes`;
+  if (seconds < 90) return pluralText(Math.max(1, Math.round(seconds)), "second");
+  return pluralText(Math.max(1, Math.round(seconds / 60)), "minute");
+}
+
+function pluralText(value, unit) {
+  return `${value} ${unit}${value === 1 ? "" : "s"}`;
 }
 
 function finiteOrDefault(value, fallback) {

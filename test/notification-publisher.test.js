@@ -308,6 +308,24 @@ test("Traffic encounter distance wording uses feet below 1000 feet", () => {
   assert.match(output.value.message, /820 feet in 60 seconds/);
 });
 
+test("Traffic encounter time wording uses singular seconds", () => {
+  const runtime = createNotificationPublisher({
+    sessionId: "traffic-session-singular-time",
+  });
+  const oneSecond = projection("alarm");
+  oneSecond.targets[0].encounter.cpa = 232;
+  oneSecond.targets[0].encounter.tcpa = 1;
+
+  const oneSecondOutput = reconcileNotifications(
+    runtime,
+    oneSecond,
+    "2026-06-20T08:00:00.000Z",
+  )[0];
+
+  assert.match(oneSecondOutput.value.message, /232 meters in 1 second/);
+  assert.doesNotMatch(oneSecondOutput.value.message, /1 seconds/);
+});
+
 function assertResolvedClear(output, expected = {}) {
   assert.equal(output.path, "notifications.collision.235900004");
   assert.equal(output.value.state, "normal");
