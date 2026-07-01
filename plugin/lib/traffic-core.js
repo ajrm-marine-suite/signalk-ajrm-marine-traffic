@@ -224,8 +224,10 @@ function createVessel(context) {
     position: null,
     positionUpdatedAt: null,
     sog: null,
+    stw: null,
     cogTrue: null,
     headingTrue: null,
+    navigationState: "",
     length: null,
     beam: null,
     fromBow: null,
@@ -243,8 +245,10 @@ function isVesselInputPath(path) {
     "name",
     "navigation.position",
     "navigation.speedOverGround",
+    "navigation.speedThroughWater",
     "navigation.courseOverGroundTrue",
     "navigation.headingTrue",
+    "navigation.state",
     "design.length",
     "design.beam",
     "design.aisShipDimensions",
@@ -280,11 +284,17 @@ function applyValue(vessel, path, rawValue, timestamp) {
     case "navigation.speedOverGround":
       vessel.sog = finiteOrNull(value);
       break;
+    case "navigation.speedThroughWater":
+      vessel.stw = finiteOrNull(value);
+      break;
     case "navigation.courseOverGroundTrue":
       vessel.cogTrue = finiteOrNull(value);
       break;
     case "navigation.headingTrue":
       vessel.headingTrue = finiteOrNull(value);
+      break;
+    case "navigation.state":
+      vessel.navigationState = String(value || "");
       break;
     case "design.length":
       vessel.length = finiteOrNull(value?.overall ?? value);

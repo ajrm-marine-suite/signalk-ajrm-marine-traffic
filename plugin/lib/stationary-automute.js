@@ -14,13 +14,16 @@ function stationaryAutomuteProfileAllowed(profile, profileSettings = {}) {
 function stationaryAutomuteStationaryState({
 	selfTarget,
 	speedOverGround,
+	speedThroughWater,
 	threshold,
 }) {
 	const sog = finiteNumber(speedOverGround) ?? finiteNumber(selfTarget?.sog);
-	if (sog == null) {
+	const stw = finiteNumber(speedThroughWater) ?? finiteNumber(selfTarget?.stw);
+	const speed = maxFinite(sog, stw);
+	if (speed == null) {
 		return null;
 	}
-	return sog <= threshold;
+	return speed <= threshold;
 }
 
 function clearedStationaryAutomuteState() {
@@ -54,6 +57,7 @@ function stationaryAutomuteTransition({
 	state = {},
 	stableSamples = DEFAULT_STATIONARY_AUTOMUTE_STABLE_SAMPLES,
 	speedOverGround,
+	speedThroughWater,
 	threshold,
 } = {}) {
 	if (settings.automuteStationary !== true) {
@@ -82,6 +86,7 @@ function stationaryAutomuteTransition({
 	const stationary = stationaryAutomuteStationaryState({
 		selfTarget,
 		speedOverGround,
+		speedThroughWater,
 		threshold,
 	});
 	if (stationary == null) {
@@ -186,6 +191,12 @@ function finiteNumber(value) {
 	}
 	const number = Number(value);
 	return Number.isFinite(number) ? number : null;
+}
+
+function maxFinite(...values) {
+	const numbers = values.filter((value) => Number.isFinite(value));
+	if (!numbers.length) return null;
+	return Math.max(...numbers);
 }
 
 function stationaryAutomuteStatusText({

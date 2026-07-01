@@ -66,6 +66,19 @@ test("stationary automute immediately releases on movement", () => {
   assert.equal(policy.muted, false);
 });
 
+test("stationary automute releases on speed through water when GPS SOG is unavailable", () => {
+  const policy = createAudioPolicy({
+    automuteStationary: true,
+    automuteStationarySpeed: 0.35,
+  });
+  evaluateAudioPolicy(policy, "harbor", 0);
+  assert.equal(policy.muted, true);
+  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", null, { ownStw: 0.6 }), {
+    muted: false,
+  });
+  assert.equal(policy.muted, false);
+});
+
 test("stationary automute adopts inherited stationary mute after restart", () => {
   const policy = createAudioPolicy({
     automuteStationary: true,
@@ -171,6 +184,7 @@ test("Audio Policy projection reports per-profile automute allowance", () => {
   const projection = audioPolicyProjection({
     profile: "anchor",
     ownSog: 0,
+    ownStw: 0,
     policy,
     profileSettings: {
       anchor: { automuteStationary: false },

@@ -2,6 +2,12 @@
 
 Server-side collision and navigation-safety core for the AJRM Marine suite.
 
+Version `0.5.14` publishes `plugins.ajrmMarineTraffic.voyageState` as the
+suite's shared on-passage/motion projection. It uses Signal K
+`navigation.state` where available and combines speed over ground with speed
+through water so Capture and Audio do not have to infer movement separately
+when GPS/SOG is unavailable.
+
 Version `0.5.12` writes the normalized default Traffic settings on first enable
 when Signal K has not yet created a plugin config file, so a fresh install does
 not require opening settings and pressing save once.
@@ -147,7 +153,7 @@ See [AJRM Marine Logger replay](docs/REPLAY.md) for the offline replay workflow.
 
 ```bash
 cd ~/.signalk
-npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.12 --omit=dev --no-package-lock
+npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.14 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 

@@ -36,6 +36,7 @@ const {
 } = require("./lib/audio-policy");
 const { loadHarbourRegionResources } = require("./lib/harbour-region-loader");
 const { normalizeProfileSettings } = require("./lib/profiles");
+const { voyageStateProjection } = require("./lib/voyage-state");
 
 const PLUGIN_ID = "signalk-ajrm-marine-traffic";
 const TARGETS_PATH = "plugins.ajrmMarineTraffic.targets";
@@ -43,6 +44,7 @@ const CAPABILITIES_PATH = "plugins.ajrmMarineTraffic.capabilities";
 const AUTO_PROFILE_PATH = "plugins.ajrmMarineTraffic.autoProfile";
 const AUDIO_POLICY_PATH = "plugins.ajrmMarineTraffic.audioPolicy";
 const PROFILES_PATH = "plugins.ajrmMarineTraffic.profiles";
+const VOYAGE_STATE_PATH = "plugins.ajrmMarineTraffic.voyageState";
 const ALLOWED_OUTPUT_PREFIX = "plugins.ajrmMarineTraffic.";
 const STARTUP_HARBOUR_TIMEOUT_MS = 10000;
 const MAX_STARTUP_QUEUE = 1000;
@@ -69,6 +71,8 @@ module.exports = function ajrmMarineTraffic(app) {
   let audioPolicy = createAudioPolicy();
   let audioPolicySequence = 0;
   let lastAudioPolicyProjection = null;
+  let voyageStateSequence = 0;
+  let lastVoyageStateProjection = null;
   let lastAllWellAtMs = 0;
   let lastOwnPositionLostAtMs = null;
   let startupReady = true;
@@ -218,6 +222,8 @@ module.exports = function ajrmMarineTraffic(app) {
     audioPolicy = createAudioPolicy(options);
     audioPolicySequence = 0;
     lastAudioPolicyProjection = null;
+    voyageStateSequence = 0;
+    lastVoyageStateProjection = null;
     lastAllWellAtMs = Date.now();
     lastOwnPositionLostAtMs = null;
     startupReady = false;
@@ -265,6 +271,7 @@ module.exports = function ajrmMarineTraffic(app) {
         targets: projection,
         autoProfile: currentAutoProfileProjection(),
         audioPolicy: currentAudioPolicyProjection(),
+        voyageState: currentVoyageStateProjection(),
         profiles: currentProfiles(),
       });
     });
@@ -315,8 +322,10 @@ module.exports = function ajrmMarineTraffic(app) {
           { path: "name", period: 1000 },
           { path: "navigation.position", period: 1000 },
           { path: "navigation.speedOverGround", period: 1000 },
+          { path: "navigation.speedThroughWater", period: 1000 },
           { path: "navigation.courseOverGroundTrue", period: 1000 },
           { path: "navigation.headingTrue", period: 1000 },
+          { path: "navigation.state", period: 1000 },
           { path: "design.length", period: 1000 },
           { path: "design.beam", period: 1000 },
           { path: "design.aisShipDimensions", period: 1000 },
@@ -433,6 +442,7 @@ module.exports = function ajrmMarineTraffic(app) {
     publishValue(TARGETS_PATH, projection);
     publishAutoProfile();
     publishValue(AUDIO_POLICY_PATH, currentAudioPolicyProjection(true));
+    publishValue(VOYAGE_STATE_PATH, currentVoyageStateProjection(true));
     publishValue(PROFILES_PATH, currentProfiles());
   }
 
@@ -519,6 +529,7 @@ module.exports = function ajrmMarineTraffic(app) {
       profile: state.profile,
       autoProfile: true,
       audioPolicy: true,
+      voyageState: true,
       version: packageInfo.version,
     };
   }
@@ -563,6 +574,7 @@ module.exports = function ajrmMarineTraffic(app) {
       options.profiles = settings;
       evaluateAudioPolicy(audioPolicy, state.profile, state.own.sog, {
         force: true,
+        ownStw: state.own.stw,
         profileSettings: state.profileSettings,
       });
       recalculate();
@@ -596,8 +608,10 @@ module.exports = function ajrmMarineTraffic(app) {
     applyAudioPolicyCommand(audioPolicy, {
       ...(req.body || {}),
       ownSog: state.own.sog,
+      ownStw: state.own.stw,
     });
     evaluateAudioPolicy(audioPolicy, state.profile, state.own.sog, {
+      ownStw: state.own.stw,
       force: req.body?.automuteStationary !== undefined,
       profileSettings: state.profileSettings,
     });
@@ -645,6 +659,7 @@ module.exports = function ajrmMarineTraffic(app) {
       profiles: currentProfiles(),
       autoProfile: currentAutoProfileProjection(),
       audioPolicy: currentAudioPolicyProjection(),
+      voyageState: currentVoyageStateProjection(),
       silencedTargets: Array.from(state.silencedTargets),
       runtimeOnly: typeof app.savePluginOptions !== "function",
     };
@@ -722,6 +737,7 @@ module.exports = function ajrmMarineTraffic(app) {
     }
     const previousMuted = audioPolicy.muted;
     const audioAction = evaluateAudioPolicy(audioPolicy, state.profile, state.own.sog, {
+      ownStw: state.own.stw,
       profileSettings: state.profileSettings,
     });
     if (audioAction || previousMuted !== audioPolicy.muted) {
@@ -939,10 +955,23 @@ module.exports = function ajrmMarineTraffic(app) {
       authoritative: true,
       profile: state.profile,
       ownSog: state.own.sog,
+      ownStw: state.own.stw,
       policy: audioPolicy,
       profileSettings: state.profileSettings,
     });
     return lastAudioPolicyProjection;
+  }
+
+  function currentVoyageStateProjection(increment = false) {
+    if (increment || !lastVoyageStateProjection) voyageStateSequence += 1;
+    lastVoyageStateProjection = voyageStateProjection({
+      sessionId: state.sessionId,
+      sequence: voyageStateSequence,
+      profile: state.profile,
+      own: state.own,
+      thresholdMps: audioPolicy.automuteStationarySpeed,
+    });
+    return lastVoyageStateProjection;
   }
 };
 

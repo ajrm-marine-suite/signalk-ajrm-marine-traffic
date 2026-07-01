@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.14
+
+- Publish an authoritative `plugins.ajrmMarineTraffic.voyageState` projection
+  derived from Signal K `navigation.state`, speed over ground, and speed
+  through water.
+- Use speed through water as well as speed over ground for stationary automute,
+  so sound can unmute when GPS/SOG is unavailable but the vessel is moving
+  through the water.
+
 ## 0.5.12
 
 - Materialize normalized default Traffic settings on first enable so a fresh

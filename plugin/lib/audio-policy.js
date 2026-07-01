@@ -33,13 +33,13 @@ function evaluateAudioPolicy(
   policy,
   profile,
   ownSog,
-  { force = false, profileSettings } = {},
+  { force = false, ownStw, profileSettings } = {},
 ) {
   const transition = stationaryAutomuteTransition({
     currentProfile: profile,
     force,
     profileSettings,
-    selfTarget: { sog: ownSog },
+    selfTarget: { sog: ownSog, stw: ownStw },
     settings: policy,
     state: policy.automuteState,
     threshold: policy.automuteStationarySpeed,
@@ -61,7 +61,7 @@ function applyAudioPolicyCommand(policy, command = {}) {
   if (typeof command.muted === "boolean") {
     policy.muted = command.muted;
     const stationary = stationaryAutomuteStationaryState({
-      selfTarget: { sog: command.ownSog },
+      selfTarget: { sog: command.ownSog, stw: command.ownStw },
       threshold: policy.automuteStationarySpeed,
     });
     policy.automuteState = manualStationaryAutomuteOverrideState({
@@ -91,12 +91,13 @@ function audioPolicyProjection({
   authoritative,
   profile,
   ownSog,
+  ownStw,
   policy,
   profileSettings,
   generatedAt = new Date().toISOString(),
 }) {
   const stationary = stationaryAutomuteStationaryState({
-    selfTarget: { sog: ownSog },
+    selfTarget: { sog: ownSog, stw: ownStw },
     threshold: policy.automuteStationarySpeed,
   });
   const automuteAllowed = stationaryAutomuteProfileAllowed(
