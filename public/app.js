@@ -89,6 +89,8 @@ const els = {
   mute: document.getElementById("mute"),
   automuteStationary: document.getElementById("automuteStationary"),
   automuteSpeed: document.getElementById("automuteSpeed"),
+  automuteStationaryDelay: document.getElementById("automuteStationaryDelay"),
+  automuteMovingDelay: document.getElementById("automuteMovingDelay"),
   allWellEnabled: document.getElementById("allWellEnabled"),
   allWellMessage: document.getElementById("allWellMessage"),
   allWellInterval: document.getElementById("allWellInterval"),
@@ -168,12 +170,16 @@ function render() {
   els.mute.disabled = !enabled;
   els.automuteStationary.disabled = !enabled;
   els.automuteSpeed.disabled = !enabled;
+  els.automuteStationaryDelay.disabled = !enabled;
+  els.automuteMovingDelay.disabled = !enabled;
   els.allWellEnabled.disabled = !enabled;
   els.allWellMessage.disabled = !enabled;
   els.allWellInterval.disabled = !enabled;
   els.mute.textContent = audioPolicy.muted ? "Enable audio" : "Mute audio";
   els.automuteStationary.checked = audioPolicy.automuteStationary === true;
   setEditableInputValue(els.automuteSpeed, audioPolicy.automuteStationarySpeed ?? 0.35);
+  setEditableInputValue(els.automuteStationaryDelay, audioPolicy.automuteStationaryDelaySeconds ?? 10);
+  setEditableInputValue(els.automuteMovingDelay, audioPolicy.automuteMovingDelaySeconds ?? 3);
   els.allWellEnabled.checked = audioPolicy.allWellEnabled === true;
   setEditableInputValue(els.allWellMessage, audioPolicy.allWellMessage || "All's well.");
   setEditableInputValue(els.allWellInterval, audioPolicy.allWellIntervalMinutes ?? 30);
@@ -354,10 +360,18 @@ els.mute.addEventListener("click", () => runCommand(async () => {
 }));
 els.automuteStationary.addEventListener("change", () => saveAudioPolicy());
 els.automuteSpeed.addEventListener("change", () => saveAudioPolicy());
+els.automuteStationaryDelay.addEventListener("change", () => saveAudioPolicy());
+els.automuteMovingDelay.addEventListener("change", () => saveAudioPolicy());
 els.allWellEnabled.addEventListener("change", () => saveAudioPolicy());
 els.allWellMessage.addEventListener("change", () => saveAudioPolicy());
 els.allWellInterval.addEventListener("change", () => saveAudioPolicy());
-for (const input of [els.automuteSpeed, els.allWellMessage, els.allWellInterval]) {
+for (const input of [
+  els.automuteSpeed,
+  els.automuteStationaryDelay,
+  els.automuteMovingDelay,
+  els.allWellMessage,
+  els.allWellInterval,
+]) {
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") input.blur();
   });
@@ -383,6 +397,8 @@ function saveAudioPolicy() {
       body: JSON.stringify({
         automuteStationary: els.automuteStationary.checked,
         automuteStationarySpeed: Number(els.automuteSpeed.value),
+        automuteStationaryDelaySeconds: Number(els.automuteStationaryDelay.value),
+        automuteMovingDelaySeconds: Number(els.automuteMovingDelay.value),
         allWellEnabled: els.allWellEnabled.checked,
         allWellMessage: els.allWellMessage.value,
         allWellIntervalMinutes: Number(els.allWellInterval.value),

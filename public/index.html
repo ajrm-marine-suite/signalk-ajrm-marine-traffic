@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AJRM Marine Traffic</title>
-    <link rel="stylesheet" href="./styles.css?v=0.5.14" />
-    <script defer src="./app.js?v=0.5.14"></script>
+    <link rel="stylesheet" href="./styles.css?v=0.5.15" />
+    <script defer src="./app.js?v=0.5.15"></script>
   </head>
   <body>
     <header>
@@ -127,6 +127,12 @@
           <label><input id="automuteStationary" type="checkbox" disabled /> Enable stationary automute</label>
           <label>Stationary threshold (m/s)
             <input id="automuteSpeed" type="number" min="0" step="0.01" disabled />
+          </label>
+          <label>Stationary delay (s)
+            <input id="automuteStationaryDelay" type="number" min="0" max="300" step="1" disabled />
+          </label>
+          <label>Moving delay (s)
+            <input id="automuteMovingDelay" type="number" min="0" max="300" step="1" disabled />
           </label>
         </div>
         <div class="controls audio-policy-row all-well-row">

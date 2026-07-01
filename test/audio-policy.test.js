@@ -6,12 +6,14 @@ const {
   applyAudioPolicyCommand,
   audioPolicyProjection,
   createAudioPolicy,
+  DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS,
+  DEFAULT_AUTOMUTE_STATIONARY_DELAY_SECONDS,
   evaluateAudioPolicy,
 } = require("../plugin/lib/audio-policy");
 const { normalizeProfileSettings } = require("../plugin/lib/profiles");
 
 test("stationary automute is limited to Anchor and Harbour profiles", () => {
-  const policy = createAudioPolicy({
+  const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
   });
@@ -31,7 +33,7 @@ test("profile settings default stationary automute by sailing profile", () => {
 });
 
 test("stationary automute follows per-profile settings", () => {
-  const policy = createAudioPolicy({
+  const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
   });
@@ -53,21 +55,25 @@ test("stationary automute follows per-profile settings", () => {
   assert.equal(policy.muted, true);
 });
 
-test("stationary automute immediately releases on movement", () => {
+test("stationary automute releases on movement after the configured delay", () => {
   const policy = createAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
+    automuteStationaryDelaySeconds: 0,
+    automuteMovingDelaySeconds: 3,
   });
-  evaluateAudioPolicy(policy, "harbor", 0);
+  evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 0 });
   assert.equal(policy.muted, true);
-  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0.8), {
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0.8, { nowMs: 1000 }), null);
+  assert.equal(policy.muted, true);
+  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0.8, { nowMs: 4000 }), {
     muted: false,
   });
   assert.equal(policy.muted, false);
 });
 
 test("stationary automute releases on speed through water when GPS SOG is unavailable", () => {
-  const policy = createAudioPolicy({
+  const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
   });
@@ -80,7 +86,7 @@ test("stationary automute releases on speed through water when GPS SOG is unavai
 });
 
 test("stationary automute adopts inherited stationary mute after restart", () => {
-  const policy = createAudioPolicy({
+  const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
     muted: true,
@@ -96,7 +102,7 @@ test("stationary automute adopts inherited stationary mute after restart", () =>
 });
 
 test("stationary automute releases inherited mute when profile leaves harbour", () => {
-  const policy = createAudioPolicy({
+  const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
     muted: true,
@@ -134,7 +140,7 @@ test("stationary automute does not release manual mute on first moving sample", 
 });
 
 test("manual mute override persists until stationary state changes", () => {
-  const policy = createAudioPolicy({
+  const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
   });
@@ -200,6 +206,39 @@ test("Audio Policy enables stationary automute and All's well by default", () =>
 
   assert.equal(policy.automuteStationary, true);
   assert.equal(policy.allWellEnabled, true);
+  assert.equal(policy.automuteStationaryDelaySeconds, DEFAULT_AUTOMUTE_STATIONARY_DELAY_SECONDS);
+  assert.equal(policy.automuteMovingDelaySeconds, DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS);
+});
+
+test("stationary automute waits before muting so brief GPS jumps do not silence alerts", () => {
+  const policy = createAudioPolicy({
+    automuteStationary: true,
+    automuteStationarySpeed: 0.35,
+    automuteStationaryDelaySeconds: 10,
+    automuteMovingDelaySeconds: 0,
+  });
+
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 1000 }), null);
+  assert.equal(policy.muted, false);
+  assert.equal(policy.automuteState.pendingStationary, true);
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 5000 }), null);
+  assert.equal(policy.muted, false);
+  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 11000 }), {
+    muted: true,
+  });
+});
+
+test("unknown speed after GPS loss does not trigger stationary automute", () => {
+  const policy = createAudioPolicy({
+    automuteStationary: true,
+    automuteStationarySpeed: 0.35,
+    automuteStationaryDelaySeconds: 10,
+  });
+
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0.8, { nowMs: 1000 }), null);
+  assert.equal(evaluateAudioPolicy(policy, "harbor", null, { nowMs: 2000 }), null);
+  assert.equal(policy.muted, false);
+  assert.equal(policy.automuteState.pendingStationary, null);
 });
 
 test("Audio Policy allows stationary automute and All's well to be disabled", () => {
@@ -233,3 +272,11 @@ test("Audio Policy normalizes All's well command settings", () => {
   assert.equal(policy.allWellMessage, "All's well.");
   assert.equal(policy.allWellIntervalMinutes, 30);
 });
+
+function createImmediateAudioPolicy(options = {}) {
+  return createAudioPolicy({
+    automuteStationaryDelaySeconds: 0,
+    automuteMovingDelaySeconds: 0,
+    ...options,
+  });
+}

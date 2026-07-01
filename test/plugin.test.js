@@ -411,6 +411,8 @@ test("Traffic publishes Auto Profile and Audio Policy contracts and accepts comm
     calculationDelayMs: 0,
     profile: "coastal",
     automuteStationary: true,
+    automuteStationaryDelaySeconds: 0,
+    automuteMovingDelaySeconds: 0,
   });
   fixture.deltaHandler({
     context: fixture.app.selfId,
@@ -968,6 +970,8 @@ test("Traffic does not persist runtime stationary automute as manual mute", asyn
     calculationDelayMs: 0,
     muted: false,
     profile: "harbor",
+    automuteStationaryDelaySeconds: 0,
+    automuteMovingDelaySeconds: 0,
   });
 
   for (let index = 0; index < 3; index += 1) {

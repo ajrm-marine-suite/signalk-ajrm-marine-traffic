@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.15
+
+- Add configurable stationary and moving delays to stationary automute, defaulting
+  to 10 seconds before muting and 3 seconds before unmuting.
+- Treat unknown speed after GPS loss as unknown rather than stationary, so a
+  harbour GPS-loss alert is not immediately silenced by automute.
+
 ## 0.5.14
 
 - Publish an authoritative `plugins.ajrmMarineTraffic.voyageState` projection

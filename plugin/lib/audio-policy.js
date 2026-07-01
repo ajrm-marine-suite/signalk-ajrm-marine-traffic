@@ -10,6 +10,8 @@ const {
 } = require("./stationary-automute");
 
 const DEFAULT_AUTOMUTE_STATIONARY_SPEED = 0.35;
+const DEFAULT_AUTOMUTE_STATIONARY_DELAY_SECONDS = 10;
+const DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS = 3;
 const DEFAULT_ALL_WELL_MESSAGE = "All's well.";
 const DEFAULT_ALL_WELL_INTERVAL_MINUTES = 30;
 
@@ -18,6 +20,14 @@ function createAudioPolicy(options = {}) {
     muted: options.muted === true,
     automuteStationary: options.automuteStationary !== false,
     automuteStationarySpeed: normalizeSpeed(options.automuteStationarySpeed),
+    automuteStationaryDelaySeconds: normalizeDelaySeconds(
+      options.automuteStationaryDelaySeconds,
+      DEFAULT_AUTOMUTE_STATIONARY_DELAY_SECONDS,
+    ),
+    automuteMovingDelaySeconds: normalizeDelaySeconds(
+      options.automuteMovingDelaySeconds,
+      DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS,
+    ),
     allWellEnabled: options.allWellEnabled !== false,
     allWellMessage: normalizeAllWellMessage(options.allWellMessage),
     allWellIntervalMinutes: normalizeAllWellIntervalMinutes(
@@ -33,7 +43,7 @@ function evaluateAudioPolicy(
   policy,
   profile,
   ownSog,
-  { force = false, ownStw, profileSettings } = {},
+  { force = false, nowMs, ownStw, profileSettings } = {},
 ) {
   const transition = stationaryAutomuteTransition({
     currentProfile: profile,
@@ -43,6 +53,7 @@ function evaluateAudioPolicy(
     settings: policy,
     state: policy.automuteState,
     threshold: policy.automuteStationarySpeed,
+    nowMs,
   });
   policy.automuteState = transition.state;
   if (transition.action) policy.muted = transition.action.muted;
@@ -56,6 +67,18 @@ function applyAudioPolicyCommand(policy, command = {}) {
   if (command.automuteStationarySpeed !== undefined) {
     policy.automuteStationarySpeed = normalizeSpeed(
       command.automuteStationarySpeed,
+    );
+  }
+  if (command.automuteStationaryDelaySeconds !== undefined) {
+    policy.automuteStationaryDelaySeconds = normalizeDelaySeconds(
+      command.automuteStationaryDelaySeconds,
+      DEFAULT_AUTOMUTE_STATIONARY_DELAY_SECONDS,
+    );
+  }
+  if (command.automuteMovingDelaySeconds !== undefined) {
+    policy.automuteMovingDelaySeconds = normalizeDelaySeconds(
+      command.automuteMovingDelaySeconds,
+      DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS,
     );
   }
   if (typeof command.muted === "boolean") {
@@ -116,6 +139,8 @@ function audioPolicyProjection({
     muted: policy.muted,
     automuteStationary: policy.automuteStationary,
     automuteStationarySpeed: policy.automuteStationarySpeed,
+    automuteStationaryDelaySeconds: policy.automuteStationaryDelaySeconds,
+    automuteMovingDelaySeconds: policy.automuteMovingDelaySeconds,
     allWellEnabled: policy.allWellEnabled,
     allWellMessage: policy.allWellMessage,
     allWellIntervalMinutes: policy.allWellIntervalMinutes,
@@ -152,9 +177,18 @@ function normalizeAllWellIntervalMinutes(value) {
     : DEFAULT_ALL_WELL_INTERVAL_MINUTES;
 }
 
+function normalizeDelaySeconds(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0
+    ? Math.min(300, Math.round(number))
+    : fallback;
+}
+
 module.exports = {
   DEFAULT_ALL_WELL_INTERVAL_MINUTES,
   DEFAULT_ALL_WELL_MESSAGE,
+  DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS,
+  DEFAULT_AUTOMUTE_STATIONARY_DELAY_SECONDS,
   DEFAULT_AUTOMUTE_STATIONARY_SPEED,
   applyAudioPolicyCommand,
   audioPolicyProjection,

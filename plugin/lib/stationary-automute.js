@@ -32,6 +32,7 @@ function clearedStationaryAutomuteState() {
 		lastStationary: null,
 		manualOverride: false,
 		pendingCount: 0,
+		pendingSinceMs: null,
 		pendingStationary: null,
 	};
 }
@@ -59,6 +60,7 @@ function stationaryAutomuteTransition({
 	speedOverGround,
 	speedThroughWater,
 	threshold,
+	nowMs = Date.now(),
 } = {}) {
 	if (settings.automuteStationary !== true) {
 		return {
@@ -79,6 +81,7 @@ function stationaryAutomuteTransition({
 			state: {
 				...clearedStationaryAutomuteState(),
 				manualOverride: state.manualOverride === true,
+				pendingSinceMs: null,
 			},
 		};
 	}
@@ -96,6 +99,7 @@ function stationaryAutomuteTransition({
 				...state,
 				lastStationary: state.lastStationary ?? null,
 				pendingCount: 0,
+				pendingSinceMs: null,
 				pendingStationary: null,
 			},
 		};
@@ -109,31 +113,32 @@ function stationaryAutomuteTransition({
 				...state,
 				lastStationary: stationary,
 				pendingCount: 0,
+				pendingSinceMs: null,
 				pendingStationary: null,
 			},
 		};
 	}
 
-	// Releasing an automatic mute is safety-critical: as soon as a valid speed
-	// sample shows the vessel moving, allow announcements in the same refresh.
-	// Keep the debounce when becoming stationary so brief speed dropouts do not
-	// repeatedly mute and unmute the system.
-	const releaseAutomaticMute =
-		stationary === false && state.automaticMuteActive === true;
-	if (
-		!force &&
-		!releaseAutomaticMute &&
-		state.lastStationary != null &&
-		stateChanged
-	) {
+	const inheritedAutomaticMute =
+		stationary === true &&
+		settings.muted === true &&
+		state.lastStationary == null &&
+		state.manualOverride !== true;
+	if (!force && stateChanged && !inheritedAutomaticMute) {
+		const delayMs = transitionDelayMs({ stationary, settings });
+		const pendingSinceMs =
+			state.pendingStationary === stationary && Number.isFinite(state.pendingSinceMs)
+				? state.pendingSinceMs
+				: nowMs;
 		const pendingCount =
 			state.pendingStationary === stationary ? (state.pendingCount || 0) + 1 : 1;
-		if (pendingCount < Math.max(1, stableSamples)) {
+		if (Math.max(0, nowMs - pendingSinceMs) < delayMs) {
 			return {
 				action: null,
 				state: {
 					...state,
 					pendingCount,
+					pendingSinceMs,
 					pendingStationary: stationary,
 				},
 			};
@@ -142,11 +147,6 @@ function stationaryAutomuteTransition({
 
 	if (force || stateChanged) {
 		const desiredMuted = stationary;
-		const inheritedAutomaticMute =
-			desiredMuted === true &&
-			settings.muted === true &&
-			state.lastStationary == null &&
-			state.manualOverride !== true;
 		const action = automaticMuteAction({
 			desiredMuted,
 			settings,
@@ -163,6 +163,7 @@ function stationaryAutomuteTransition({
 				lastStationary: stationary,
 				manualOverride: false,
 				pendingCount: 0,
+				pendingSinceMs: null,
 				pendingStationary: null,
 			},
 		};
@@ -174,9 +175,17 @@ function stationaryAutomuteTransition({
 			...state,
 			lastStationary: stationary,
 			pendingCount: 0,
+			pendingSinceMs: null,
 			pendingStationary: null,
 		},
 	};
+}
+
+function transitionDelayMs({ stationary, settings = {} }) {
+	const seconds = stationary
+		? finiteNumber(settings.automuteStationaryDelaySeconds)
+		: finiteNumber(settings.automuteMovingDelaySeconds);
+	return Math.max(0, seconds ?? 0) * 1000;
 }
 
 function automaticMuteAction({ desiredMuted, settings = {}, state = {} }) {
@@ -228,6 +237,16 @@ function stationaryAutomuteStatusText({
 		return settings.muted ? "Muted manually." : "Sound enabled manually.";
 	}
 
+	if (state.pendingStationary === true) {
+		return "Sound enabled. Waiting before stationary automute.";
+	}
+
+	if (state.pendingStationary === false) {
+		return settings.muted
+			? "Muted. Waiting before motion unmute."
+			: "Sound enabled. Confirming vessel movement.";
+	}
+
 	if (settings.muted && state.automaticMuteActive === true) {
 		return "Muted because vessel is stationary.";
 	}
@@ -251,4 +270,5 @@ module.exports = {
 	stationaryAutomuteStationaryState,
 	stationaryAutomuteStatusText,
 	stationaryAutomuteTransition,
+	transitionDelayMs,
 };

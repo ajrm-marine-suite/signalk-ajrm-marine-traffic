@@ -28,6 +28,8 @@ const {
 const {
   DEFAULT_ALL_WELL_INTERVAL_MINUTES,
   DEFAULT_ALL_WELL_MESSAGE,
+  DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS,
+  DEFAULT_AUTOMUTE_STATIONARY_DELAY_SECONDS,
   DEFAULT_AUTOMUTE_STATIONARY_SPEED,
   applyAudioPolicyCommand,
   audioPolicyProjection,
@@ -186,6 +188,18 @@ module.exports = function ajrmMarineTraffic(app) {
         title: "Automute stationary speed (m/s)",
         minimum: 0,
         default: DEFAULT_AUTOMUTE_STATIONARY_SPEED,
+      },
+      automuteStationaryDelaySeconds: {
+        type: "number",
+        title: "Stationary automute delay (seconds)",
+        minimum: 0,
+        default: DEFAULT_AUTOMUTE_STATIONARY_DELAY_SECONDS,
+      },
+      automuteMovingDelaySeconds: {
+        type: "number",
+        title: "Moving audio-enable delay (seconds)",
+        minimum: 0,
+        default: DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS,
       },
       allWellEnabled: {
         type: "boolean",
@@ -683,6 +697,8 @@ module.exports = function ajrmMarineTraffic(app) {
         muted: audioPolicy.muted,
         automuteStationary: audioPolicy.automuteStationary,
         automuteStationarySpeed: audioPolicy.automuteStationarySpeed,
+        automuteStationaryDelaySeconds: audioPolicy.automuteStationaryDelaySeconds,
+        automuteMovingDelaySeconds: audioPolicy.automuteMovingDelaySeconds,
         allWellEnabled: audioPolicy.allWellEnabled,
         allWellMessage: audioPolicy.allWellMessage,
         allWellIntervalMinutes: audioPolicy.allWellIntervalMinutes,
@@ -1037,6 +1053,16 @@ function normalizeOptions(value) {
       Number(value.automuteStationarySpeed) >= 0
         ? Number(value.automuteStationarySpeed)
         : DEFAULT_AUTOMUTE_STATIONARY_SPEED,
+    automuteStationaryDelaySeconds:
+      Number.isFinite(Number(value.automuteStationaryDelaySeconds)) &&
+      Number(value.automuteStationaryDelaySeconds) >= 0
+        ? Math.min(300, Math.round(Number(value.automuteStationaryDelaySeconds)))
+        : DEFAULT_AUTOMUTE_STATIONARY_DELAY_SECONDS,
+    automuteMovingDelaySeconds:
+      Number.isFinite(Number(value.automuteMovingDelaySeconds)) &&
+      Number(value.automuteMovingDelaySeconds) >= 0
+        ? Math.min(300, Math.round(Number(value.automuteMovingDelaySeconds)))
+        : DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS,
     allWellEnabled: value.allWellEnabled !== false,
     allWellMessage:
       String(value.allWellMessage || "").trim() || DEFAULT_ALL_WELL_MESSAGE,

@@ -2,6 +2,12 @@
 
 Server-side collision and navigation-safety core for the AJRM Marine suite.
 
+Version `0.5.15` adds configurable stationary automute debounce: by default
+Traffic waits 10 seconds before muting after stationary detection and 3 seconds
+before unmuting after motion detection. Unknown speed after GPS loss is kept
+unknown rather than treated as stationary, so the GPS-lost alert is not
+silenced immediately in harbour.
+
 Version `0.5.14` publishes `plugins.ajrmMarineTraffic.voyageState` as the
 suite's shared on-passage/motion projection. It uses Signal K
 `navigation.state` where available and combines speed over ground with speed
@@ -153,7 +159,7 @@ See [AJRM Marine Logger replay](docs/REPLAY.md) for the offline replay workflow.
 
 ```bash
 cd ~/.signalk
-npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.14 --omit=dev --no-package-lock
+npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.15 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 
