@@ -124,7 +124,11 @@ function stationaryAutomuteTransition({
 		settings.muted === true &&
 		state.lastStationary == null &&
 		state.manualOverride !== true;
-	if (!force && stateChanged && !inheritedAutomaticMute) {
+	const firstKnownStationary =
+		stationary === true &&
+		state.lastStationary == null &&
+		state.manualOverride !== true;
+	if (!force && stateChanged && !inheritedAutomaticMute && !firstKnownStationary) {
 		const delayMs = transitionDelayMs({ stationary, settings });
 		const pendingSinceMs =
 			state.pendingStationary === stationary && Number.isFinite(state.pendingSinceMs)

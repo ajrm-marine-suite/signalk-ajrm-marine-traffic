@@ -139,6 +139,21 @@ test("stationary automute does not release manual mute on first moving sample", 
   assert.equal(policy.automuteState.automaticMuteActive, false);
 });
 
+test("stationary automute mutes immediately on first confirmed stationary sample", () => {
+  const policy = createAudioPolicy({
+    automuteStationary: true,
+    automuteStationarySpeed: 0.35,
+    automuteStationaryDelaySeconds: 10,
+  });
+
+  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 1000 }), {
+    muted: true,
+  });
+  assert.equal(policy.muted, true);
+  assert.equal(policy.automuteState.automaticMuteActive, true);
+  assert.equal(policy.automuteState.pendingStationary, null);
+});
+
 test("manual mute override persists until stationary state changes", () => {
   const policy = createImmediateAudioPolicy({
     automuteStationary: true,
@@ -210,7 +225,7 @@ test("Audio Policy enables stationary automute and All's well by default", () =>
   assert.equal(policy.automuteMovingDelaySeconds, DEFAULT_AUTOMUTE_MOVING_DELAY_SECONDS);
 });
 
-test("stationary automute waits before muting so brief GPS jumps do not silence alerts", () => {
+test("stationary automute waits before muting after a moving-to-stationary transition", () => {
   const policy = createAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
@@ -218,12 +233,15 @@ test("stationary automute waits before muting so brief GPS jumps do not silence 
     automuteMovingDelaySeconds: 0,
   });
 
-  assert.equal(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 1000 }), null);
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0.8, { nowMs: 1000 }), null);
+  assert.equal(policy.muted, false);
+  assert.equal(policy.automuteState.lastStationary, false);
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 2000 }), null);
   assert.equal(policy.muted, false);
   assert.equal(policy.automuteState.pendingStationary, true);
-  assert.equal(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 5000 }), null);
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 6000 }), null);
   assert.equal(policy.muted, false);
-  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 11000 }), {
+  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0, { nowMs: 12000 }), {
     muted: true,
   });
 });
