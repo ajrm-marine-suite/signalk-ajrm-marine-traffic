@@ -184,6 +184,87 @@ test("same-state encounter text refresh is throttled and visual-only", () => {
   assert.match(revision[0].value.message, /90 meters/);
 });
 
+test("same-state alarm repeats audio when the profile repeat interval is due", () => {
+  const runtime = createNotificationPublisher({
+    sessionId: "traffic-session",
+    visualRefreshMs: 15000,
+  });
+  const value = projection();
+  value.profile = "coastal";
+  value.profileSettings = {
+    current: "coastal",
+    coastal: { repeatSensitivity: 1 },
+  };
+  reconcileNotifications(runtime, value, "2026-06-20T08:00:00.000Z");
+
+  const quietRefresh = projection();
+  quietRefresh.profile = "coastal";
+  quietRefresh.profileSettings = value.profileSettings;
+  quietRefresh.targets[0].encounter.cpa = 90;
+  const visualOnly = reconcileNotifications(
+    runtime,
+    quietRefresh,
+    "2026-06-20T08:00:15.000Z",
+  );
+  assert.equal(visualOnly.length, 1);
+  assert.deepEqual(visualOnly[0].value.method, ["visual"]);
+  assert.equal(visualOnly[0].value.data.ajrmMarineNotifications.delivery.audio, false);
+
+  const repeat = reconcileNotifications(
+    runtime,
+    quietRefresh,
+    "2026-06-20T08:01:00.000Z",
+  );
+  assert.equal(repeat.length, 1);
+  assert.deepEqual(repeat[0].value.method, ["visual", "sound"]);
+  const envelope = repeat[0].value.data.ajrmMarineNotifications;
+  assert.equal(envelope.delivery.audio, true);
+  assert.equal(envelope.delivery.repeatSeconds, 60);
+});
+
+test("profile repeat sensitivity scales alarm repeat audio", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
+  const value = projection();
+  value.profile = "coastal";
+  value.profileSettings = {
+    current: "coastal",
+    coastal: { repeatSensitivity: 2 },
+  };
+  reconcileNotifications(runtime, value, "2026-06-20T08:00:00.000Z");
+
+  assert.deepEqual(
+    reconcileNotifications(runtime, value, "2026-06-20T08:00:29.000Z"),
+    [],
+  );
+  const repeat = reconcileNotifications(
+    runtime,
+    value,
+    "2026-06-20T08:00:30.000Z",
+  );
+  assert.equal(repeat.length, 1);
+  assert.deepEqual(repeat[0].value.method, ["visual", "sound"]);
+  assert.equal(
+    repeat[0].value.data.ajrmMarineNotifications.delivery.repeatSeconds,
+    30,
+  );
+});
+
+test("zero repeat sensitivity disables same-state repeat audio", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
+  const value = projection();
+  value.profile = "coastal";
+  value.profileSettings = {
+    current: "coastal",
+    coastal: { repeatSensitivity: 0 },
+  };
+  reconcileNotifications(runtime, value, "2026-06-20T08:00:00.000Z");
+
+  assert.deepEqual(
+    reconcileNotifications(runtime, value, "2026-06-20T08:10:00.000Z"),
+    [],
+  );
+});
+
 test("Traffic encounter messages use miles without saying nautical", () => {
   const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   const value = projection("warn");

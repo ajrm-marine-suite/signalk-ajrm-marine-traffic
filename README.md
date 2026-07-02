@@ -149,9 +149,10 @@ vessels.self.plugins.ajrmMarineTraffic.profiles
 vessels.self.notifications.collision.*
 ```
 
-Collision notifications publish below `notifications.collision.*` only when
-encounter state enters or changes among `warn`, `alarm`, and `emergency`;
-unchanged calculations do not create duplicate audio requests.
+Collision notifications publish below `notifications.collision.*` when an
+encounter state enters or changes among `warn`, `alarm`, and `emergency`, and
+ongoing active alerts repeat audio according to the current profile's repeat
+sensitivity.
 
 See [AJRM Marine Logger replay](docs/REPLAY.md) for the offline replay workflow.
 
@@ -159,7 +160,7 @@ See [AJRM Marine Logger replay](docs/REPLAY.md) for the offline replay workflow.
 
 ```bash
 cd ~/.signalk
-npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.15 --omit=dev --no-package-lock
+npm install git+https://github.com/ajrm-marine-suite/signalk-ajrm-marine-traffic.git#v0.5.16 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 

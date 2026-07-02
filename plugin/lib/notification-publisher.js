@@ -4,6 +4,12 @@ const { randomUUID } = require("node:crypto");
 
 const ACTIVE_STATES = new Set(["alert", "warn", "alarm", "emergency"]);
 const DEFAULT_VISUAL_REFRESH_MS = 15000;
+const REPEAT_INTERVAL_SECONDS = Object.freeze({
+  alert: 180,
+  warn: 120,
+  alarm: 60,
+  emergency: 30,
+});
 
 function createNotificationPublisher(options = {}) {
   return {
@@ -42,11 +48,25 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
     const name = String(target.name || identity);
     const nowMs = Date.parse(now) || 0;
     const metadataChanged = previous && previous.name !== name;
+    const repeatSeconds = repeatIntervalSeconds(
+      state,
+      projection?.profileSettings,
+      projection?.profile,
+    );
+    const audioRepeatDue =
+      previous?.state === state &&
+      repeatSeconds > 0 &&
+      nowMs - (previous.lastSoundAtMs || 0) >= repeatSeconds * 1000;
     const visualRefreshDue =
       previous &&
       previous.message !== message &&
       nowMs - previous.publishedAtMs >= runtime.visualRefreshMs;
-    if (previous?.state === state && !metadataChanged && !visualRefreshDue) {
+    if (
+      previous?.state === state &&
+      !metadataChanged &&
+      !visualRefreshDue &&
+      !audioRepeatDue
+    ) {
       continue;
     }
 
@@ -58,8 +78,9 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
     const level = priorityLevel(state);
     const eventId = `traffic-collision-${sanitizePathSegment(identity)}-${runtime.sourceSequence}`;
     const isVisualRevision = previous?.state === state;
-    const methods =
-      isVisualRevision || state === "alert" ? ["visual"] : ["visual", "sound"];
+    const shouldSpeak =
+      (!isVisualRevision && state !== "alert") || audioRepeatDue;
+    const methods = shouldSpeak ? ["visual", "sound"] : ["visual"];
 
     outputs.push({
       path,
@@ -101,7 +122,7 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
               streamOutput: true,
               muteState:
                 typeof runtime.muteState === "boolean" ? runtime.muteState : null,
-              repeatSeconds: 0,
+              repeatSeconds,
               expiresSeconds: 90,
             },
             presentation: {
@@ -142,6 +163,7 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
       message,
       name,
       publishedAtMs: nowMs,
+      lastSoundAtMs: shouldSpeak ? nowMs : previous?.lastSoundAtMs || 0,
     });
   }
 
@@ -490,6 +512,17 @@ function pluralText(value, unit) {
   return `${value} ${unit}${value === 1 ? "" : "s"}`;
 }
 
+function repeatIntervalSeconds(state, profileSettings = {}, profileName = "") {
+  const base = REPEAT_INTERVAL_SECONDS[state] || 0;
+  if (base <= 0) return 0;
+  const selectedProfile = String(profileSettings?.current || profileName || "").trim();
+  const profile = profileSettings?.[selectedProfile] || {};
+  if (profile.repeatSensitivity === undefined) return base;
+  const sensitivity = Number(profile.repeatSensitivity);
+  if (!Number.isFinite(sensitivity) || sensitivity <= 0) return 0;
+  return Math.max(1, Math.round(base / sensitivity));
+}
+
 function finiteOrDefault(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : fallback;
@@ -500,5 +533,6 @@ module.exports = {
   createNotificationPublisher,
   notificationPath,
   reconcileNotifications,
+  repeatIntervalSeconds,
   systemEventNotification,
 };

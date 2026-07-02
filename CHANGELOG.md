@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.16
+
+- Honour the current profile's repeat sensitivity for ongoing collision audio,
+  so active alarms can repeat after the configured interval instead of becoming
+  visual-only after the first spoken alert.
+
 ## 0.5.15
 
 - Add configurable stationary and moving delays to stationary automute, defaulting
