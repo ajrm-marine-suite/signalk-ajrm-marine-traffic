@@ -86,6 +86,151 @@ test("Traffic encounter messages use bow-relative clock bearing and include over
   );
 });
 
+test("Traffic encounter messages cover passing and overtaking geometry", () => {
+  const cases = [
+    {
+      name: "CPA to starboard",
+      cpaBearingRelative: Math.PI / 2,
+      bearingRelative: Math.PI / 4,
+      ownSog: 5,
+      targetSog: 5,
+      ownCogTrue: 0,
+      targetCogTrue: Math.PI,
+      expected: /CPA will be on your starboard side/,
+    },
+    {
+      name: "CPA to port",
+      cpaBearingRelative: (3 * Math.PI) / 2,
+      bearingRelative: (7 * Math.PI) / 4,
+      ownSog: 5,
+      targetSog: 5,
+      ownCogTrue: 0,
+      targetCogTrue: Math.PI,
+      expected: /CPA will be on your port side/,
+    },
+    {
+      name: "CPA ahead",
+      cpaBearingRelative: 0,
+      bearingRelative: 0,
+      ownSog: 5,
+      targetSog: 5,
+      ownCogTrue: 0,
+      targetCogTrue: Math.PI,
+      expected: /CPA will be ahead/,
+    },
+    {
+      name: "CPA astern",
+      cpaBearingRelative: Math.PI,
+      bearingRelative: Math.PI,
+      ownSog: 5,
+      targetSog: 5,
+      ownCogTrue: 0,
+      targetCogTrue: Math.PI,
+      expected: /CPA will be astern/,
+    },
+    {
+      name: "own vessel overtaking",
+      cpaBearingRelative: 0,
+      bearingRelative: 0,
+      ownSog: 6,
+      targetSog: 3,
+      ownCogTrue: 0,
+      targetCogTrue: 0.05,
+      expected: /You are overtaking it\. CPA will be ahead/,
+    },
+    {
+      name: "target overtaking own vessel",
+      cpaBearingRelative: Math.PI,
+      bearingRelative: Math.PI,
+      ownSog: 3,
+      targetSog: 6,
+      ownCogTrue: 0,
+      targetCogTrue: 0.05,
+      expected: /It is overtaking you\. CPA will be astern/,
+    },
+    {
+      name: "parallel same-speed passing",
+      cpaBearingRelative: Math.PI / 2,
+      bearingRelative: Math.PI / 2,
+      ownSog: 5,
+      targetSog: 5,
+      ownCogTrue: 0,
+      targetCogTrue: 0.05,
+      expected: /Same general course\. CPA will be on your starboard side/,
+    },
+    {
+      name: "close quarters",
+      cpaBearingRelative: Math.PI / 2,
+      bearingRelative: Math.PI / 2,
+      ownSog: 5,
+      targetSog: 5,
+      ownCogTrue: 0,
+      targetCogTrue: Math.PI,
+      cpa: 44,
+      expected: /Close quarters\. CPA 44 meters/,
+    },
+    {
+      name: "collision risk",
+      cpaBearingRelative: 0,
+      bearingRelative: 0,
+      ownSog: 5,
+      targetSog: 5,
+      ownCogTrue: 0,
+      targetCogTrue: Math.PI,
+      cpa: 0,
+      expected: /Risk of collision\. CPA 0 meters/,
+    },
+  ];
+
+  for (const item of cases) {
+    const runtime = createNotificationPublisher({ sessionId: `traffic-session-${item.name}` });
+    const value = projection("warn");
+    Object.assign(value.targets[0].encounter, {
+      cpaBearingRelative: item.cpaBearingRelative,
+      bearingRelative: item.bearingRelative,
+      ownSog: item.ownSog,
+      targetSog: item.targetSog,
+      ownCogTrue: item.ownCogTrue,
+      targetCogTrue: item.targetCogTrue,
+      cpa: item.cpa ?? 125,
+      tcpa: 240,
+    });
+
+    const output = reconcileNotifications(
+      runtime,
+      value,
+      "2026-06-20T08:00:00.000Z",
+    )[0];
+    const presentation = output.value.data.ajrmMarineNotifications.presentation;
+
+    assert.match(output.value.message, item.expected, item.name);
+    assert.match(presentation.audioMessage, item.expected, item.name);
+  }
+});
+
+test("Traffic does not speak stationary or normal non-collision targets", () => {
+  const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
+  const stationary = projection("normal");
+  Object.assign(stationary.targets[0].encounter, {
+    collisionCandidate: false,
+    ownSog: 0,
+    targetSog: 0,
+    cpa: null,
+    tcpa: null,
+  });
+  assert.deepEqual(reconcileNotifications(runtime, stationary), []);
+
+  const normalMoving = projection("normal");
+  Object.assign(normalMoving.targets[0].encounter, {
+    collisionCandidate: true,
+    ownSog: 5,
+    targetSog: 5,
+    cpa: 5000,
+    tcpa: 1800,
+  });
+  assert.deepEqual(reconcileNotifications(runtime, normalMoving), []);
+});
+
 test("Traffic system events are one-shot broker history notifications", () => {
   const runtime = createNotificationPublisher({ sessionId: "traffic-session" });
   runtime.muteState = false;

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.17
+
+- Add table-driven encounter wording coverage for starboard, port, ahead,
+  astern, overtaking, being overtaken, same-course passing, close quarters,
+  collision risk, and stationary/non-collision targets.
+- Assert both displayed text and spoken audio text for the encounter matrix.
+
 ## 0.5.16
 
 - Honour the current profile's repeat sensitivity for ongoing collision audio,
