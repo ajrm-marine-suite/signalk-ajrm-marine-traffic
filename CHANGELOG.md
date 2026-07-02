@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.18
+
+- Expose Traffic audio-policy status and mute control through an in-process API
+  so AJRM Marine Console BITE can unmute during controlled tests and restore
+  the skipper's prior mute state afterwards.
+
 ## 0.5.17
 
 - Add table-driven encounter wording coverage for starboard, port, ahead,

@@ -48,6 +48,7 @@ const AUDIO_POLICY_PATH = "plugins.ajrmMarineTraffic.audioPolicy";
 const PROFILES_PATH = "plugins.ajrmMarineTraffic.profiles";
 const VOYAGE_STATE_PATH = "plugins.ajrmMarineTraffic.voyageState";
 const ALLOWED_OUTPUT_PREFIX = "plugins.ajrmMarineTraffic.";
+const AJRM_MARINE_TRAFFIC_API_REGISTRY = Symbol.for("ajrmMarineTrafficApi");
 const STARTUP_HARBOUR_TIMEOUT_MS = 10000;
 const MAX_STARTUP_QUEUE = 1000;
 const GPS_RECOVERY_ANNOUNCE_MIN_OUTAGE_MS = 20000;
@@ -245,6 +246,7 @@ module.exports = function ajrmMarineTraffic(app) {
     const generation = (startupGeneration += 1);
     projection = calculateProjection(state);
     if (shouldMaterializeDefaultOptions(pluginOptions)) persistOptions();
+    exposeTrafficApi();
     subscribe();
     publish();
     app.setPluginStatus(`${statusText()}; starting Auto Profile`);
@@ -272,6 +274,10 @@ module.exports = function ajrmMarineTraffic(app) {
       }
     }
     unsubscribes = [];
+    if (app.ajrmMarineTrafficApi?.pluginId === PLUGIN_ID) delete app.ajrmMarineTrafficApi;
+    if (globalThis[AJRM_MARINE_TRAFFIC_API_REGISTRY]?.pluginId === PLUGIN_ID) {
+      delete globalThis[AJRM_MARINE_TRAFFIC_API_REGISTRY];
+    }
     publishNotifications(clearAllNotifications(notificationPublisher));
   };
 
@@ -618,31 +624,56 @@ module.exports = function ajrmMarineTraffic(app) {
   }
 
   function audioCommand(req, res) {
+    res.json({ ok: true, audio: applyAudioPolicyUpdate(req.body || {}) });
+  }
+
+  function exposeTrafficApi() {
+    const api = {
+      pluginId: PLUGIN_ID,
+      version: packageInfo.version,
+      status() {
+        return {
+          ok: true,
+          plugin: PLUGIN_ID,
+          version: packageInfo.version,
+          audioPolicy: currentAudioPolicyProjection(),
+          voyageState: currentVoyageStateProjection(),
+        };
+      },
+      setAudioPolicy(command = {}) {
+        return applyAudioPolicyUpdate(command);
+      },
+    };
+    app.ajrmMarineTrafficApi = api;
+    globalThis[AJRM_MARINE_TRAFFIC_API_REGISTRY] = api;
+  }
+
+  function applyAudioPolicyUpdate(command = {}) {
     const previousMuted = audioPolicy.muted;
     applyAudioPolicyCommand(audioPolicy, {
-      ...(req.body || {}),
+      ...command,
       ownSog: state.own.sog,
       ownStw: state.own.stw,
     });
     evaluateAudioPolicy(audioPolicy, state.profile, state.own.sog, {
       ownStw: state.own.stw,
-      force: req.body?.automuteStationary !== undefined,
+      force: command.automuteStationary !== undefined,
       profileSettings: state.profileSettings,
     });
-    if (previousMuted !== audioPolicy.muted || req.body?.muted !== undefined) {
+    if (previousMuted !== audioPolicy.muted || command.muted !== undefined) {
       audioPolicy.correlationId = randomUUID();
       audioPolicy.updatedAt = new Date().toISOString();
     }
     if (
-      req.body?.allWellEnabled !== undefined ||
-      req.body?.allWellMessage !== undefined ||
-      req.body?.allWellIntervalMinutes !== undefined
+      command.allWellEnabled !== undefined ||
+      command.allWellMessage !== undefined ||
+      command.allWellIntervalMinutes !== undefined
     ) {
       lastAllWellAtMs = Date.now();
     }
     publish();
     persistOptions();
-    res.json({ ok: true, audio: currentAudioPolicyProjection() });
+    return currentAudioPolicyProjection();
   }
 
   function silenceCommand(req, res) {

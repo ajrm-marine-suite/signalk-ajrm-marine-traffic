@@ -1088,6 +1088,23 @@ test("AJRM Marine Traffic accepts safety-affecting commands when enabled", () =>
   plugin.stop();
 });
 
+test("AJRM Marine Traffic exposes in-process audio policy controls", async () => {
+  const fixture = fakeApp();
+  const plugin = createPlugin(fixture.app);
+  plugin.start({ muted: true });
+
+  assert.equal(typeof fixture.app.ajrmMarineTrafficApi.status, "function");
+  assert.equal(typeof fixture.app.ajrmMarineTrafficApi.setAudioPolicy, "function");
+  assert.equal(fixture.app.ajrmMarineTrafficApi.status().audioPolicy.muted, true);
+
+  const audio = await fixture.app.ajrmMarineTrafficApi.setAudioPolicy({ muted: false });
+  assert.equal(audio.muted, false);
+  assert.equal(fixture.savedOptions.muted, false);
+
+  plugin.stop();
+  assert.equal(fixture.app.ajrmMarineTrafficApi, undefined);
+});
+
 function fakeApp({ regions = {}, resourceDelayMs = 0, metadata = {} } = {}) {
   const messages = [];
   let deltaHandler = null;
