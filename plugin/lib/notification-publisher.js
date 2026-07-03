@@ -386,7 +386,11 @@ function isNumericIdentifier(value) {
 function encounterGeometryPhrase(target, state) {
   const passType = passTypeLabel(target);
   if (!passType) return "";
-  if (passType === "collision") return "Risk of collision";
+  if (passType === "collision") {
+    const advisory =
+      state === "alarm" || state === "emergency" ? collisionPrompt(target, passType) : "";
+    return ["Risk of collision", advisory].filter(Boolean).join(". ");
+  }
   if (passType === "close-quarters") return "Close quarters";
   const phrase = {
     ahead: "CPA will be ahead",

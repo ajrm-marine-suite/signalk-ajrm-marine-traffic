@@ -170,7 +170,7 @@ test("Traffic encounter messages cover passing and overtaking geometry", () => {
       expected: /Close quarters\. CPA 44 meters/,
     },
     {
-      name: "collision risk",
+      name: "head-on collision risk",
       cpaBearingRelative: 0,
       bearingRelative: 0,
       ownSog: 5,
@@ -178,13 +178,14 @@ test("Traffic encounter messages cover passing and overtaking geometry", () => {
       ownCogTrue: 0,
       targetCogTrue: Math.PI,
       cpa: 0,
-      expected: /Risk of collision\. CPA 0 meters/,
+      state: "alarm",
+      expected: /Risk of collision\. Head-on: alter starboard, pass port-to-port\. CPA 0 meters/,
     },
   ];
 
   for (const item of cases) {
     const runtime = createNotificationPublisher({ sessionId: `traffic-session-${item.name}` });
-    const value = projection("warn");
+    const value = projection(item.state || "warn");
     Object.assign(value.targets[0].encounter, {
       cpaBearingRelative: item.cpaBearingRelative,
       bearingRelative: item.bearingRelative,
