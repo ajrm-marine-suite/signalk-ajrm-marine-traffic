@@ -636,9 +636,47 @@ module.exports = function ajrmMarineTraffic(app) {
           ok: true,
           plugin: PLUGIN_ID,
           version: packageInfo.version,
+          profile: state.profile,
+          profiles: currentProfiles(),
+          autoProfile: currentAutoProfileProjection(),
           audioPolicy: currentAudioPolicyProjection(),
           voyageState: currentVoyageStateProjection(),
         };
+      },
+      setProfile(profile) {
+        const selected = String(profile || "");
+        setProfile(state, selected);
+        options.profile = selected;
+        recalculate();
+        persistOptions();
+        publish();
+        return currentProfiles();
+      },
+      setProfiles(profiles = {}) {
+        const settings = setProfileSettings(state, profiles || {});
+        options.profile = state.profile;
+        options.profiles = settings;
+        evaluateAudioPolicy(audioPolicy, state.profile, state.own.sog, {
+          force: true,
+          ownStw: state.own.stw,
+          profileSettings: state.profileSettings,
+        });
+        recalculate();
+        persistOptions();
+        publish();
+        return currentProfiles();
+      },
+      setAutoProfile(command = {}) {
+        options.autoProfile = normalizeAutoProfileOptions({
+          ...options.autoProfile,
+          ...(command || {}),
+        });
+        autoProfileState.lastWarning = null;
+        recalculate();
+        startHarbourRefreshTimer();
+        persistOptions();
+        publish();
+        return currentAutoProfileProjection();
       },
       setAudioPolicy(command = {}) {
         return applyAudioPolicyUpdate(command);
