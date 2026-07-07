@@ -227,7 +227,7 @@ function autoProfileStatus(profile, options, state) {
   if (!options.enabled) return state.lastWarning || "Auto selection OFF.";
   if (state.lastError) return `Auto Profile Switch unavailable: ${state.lastError}`;
   if (profile === "anchor" && state.anchorHeld) {
-    return `Anchored selected. AJRM Marine will switch to ${profileLabel(options.outsideProfile)} when SOG exceeds ${(options.anchorReleaseSpeed / 0.514444).toFixed(1)} kn.`;
+    return `Anchored selected. AJRM Marine will switch to ${profileLabel(options.outsideProfile)} when SOG exceeds ${(options.anchorReleaseSpeed / 0.514444).toFixed(1)} knots.`;
   }
   if (state.lastMessage) return state.lastMessage;
   if (profile === options.harbourProfile) {

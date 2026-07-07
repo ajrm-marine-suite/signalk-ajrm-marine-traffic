@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.24
+
+- Expand the anchored auto-profile release-speed status from `kn` to `knots`
+  so any spoken rendering avoids unit abbreviations.
+
 ## 0.5.18
 
 - Expose Traffic audio-policy status and mute control through an in-process API
