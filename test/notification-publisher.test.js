@@ -179,7 +179,7 @@ test("Traffic encounter messages cover passing and overtaking geometry", () => {
       targetCogTrue: Math.PI,
       cpa: 0,
       state: "alarm",
-      expected: /Risk of collision\. Head-on: alter starboard, pass port-to-port\. CPA 0 meters/,
+      expected: /Risk of collision\. Head-on\. Alter starboard, pass port-to-port\. CPA 0 meters/,
     },
   ];
 

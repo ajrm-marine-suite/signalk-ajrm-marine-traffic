@@ -450,7 +450,7 @@ function collisionPrompt(target, passType) {
   if (["port", "starboard", "ahead", "behind"].includes(passType)) return "";
   const bearing = radiansToDegrees(target?.encounter?.bearingRelative);
   if (bearing === null) return "";
-  if (bearing >= 345 || bearing <= 15) return "Head-on: alter starboard, pass port-to-port";
+  if (bearing >= 345 || bearing <= 15) return "Head-on. Alter starboard, pass port-to-port";
   if (bearing <= 112.5) return "Give Way";
   return "Stand On";
 }

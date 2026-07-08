@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.25
+
+- Change the head-on collision action prompt from `Head-on:` to `Head-on.`
+  so Piper inserts a clearer spoken pause before "Alter starboard".
+
 ## 0.5.24
 
 - Expand the anchored auto-profile release-speed status from `kn` to `knots`
