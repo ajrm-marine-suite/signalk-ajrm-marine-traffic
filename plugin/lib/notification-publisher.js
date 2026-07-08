@@ -372,11 +372,11 @@ function encounterMessage(target, state, runtime = {}, options = {}) {
     parts[0] += ` at ${clockPosition(target.encounter.bearingTrue)} o'clock true`;
   }
   const geometry = encounterGeometryPhrase(target, state);
-  if (geometry) {
-    parts.push(geometry);
+  if (geometry.text) {
+    parts.push(geometry.text);
   }
   if (Number.isFinite(target.encounter.cpa) && Number.isFinite(target.encounter.tcpa)) {
-    const cpaLabel = geometry.includes("CPA will be") ? "" : "CPA ";
+    const cpaLabel = geometry.describesCpa ? "" : "CPA ";
     parts.push(
       `${cpaLabel}${distanceText(target.encounter.cpa, runtime.distanceUnit)} in ${timeText(target.encounter.tcpa)}`,
     );
@@ -395,24 +395,24 @@ function isNumericIdentifier(value) {
 
 function encounterGeometryPhrase(target, state) {
   const passType = passTypeLabel(target);
-  if (!passType) return "";
+  if (!passType) return { text: "", describesCpa: false };
   if (passType === "collision") {
     const advisory =
       state === "alarm" || state === "emergency" ? collisionPrompt(target, passType) : "";
-    return ["Risk of collision", advisory].filter(Boolean).join(". ");
+    return { text: ["Risk of collision", advisory].filter(Boolean).join(". "), describesCpa: false };
   }
-  if (passType === "close-quarters") return "Close quarters";
+  if (passType === "close-quarters") return { text: "Close quarters", describesCpa: false };
   const phrase = {
     ahead: "CPA will be ahead",
     behind: "CPA will be astern",
     starboard: "CPA will be on your starboard side",
     port: "CPA will be on your port side",
   }[passType];
-  if (!phrase) return "";
+  if (!phrase) return { text: "", describesCpa: false };
   const overtaking = overtakingPhrase(target, passType);
   const advisory =
     state === "alarm" || state === "emergency" ? collisionPrompt(target, passType) : "";
-  return [overtaking, phrase, advisory].filter(Boolean).join(". ");
+  return { text: [overtaking, phrase, advisory].filter(Boolean).join(". "), describesCpa: true };
 }
 
 function passTypeLabel(target) {

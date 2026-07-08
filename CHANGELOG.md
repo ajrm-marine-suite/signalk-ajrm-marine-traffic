@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.33
+
+- Remove a generated-message text check from Traffic encounter wording; CPA
+  geometry now carries an explicit flag for whether it already describes CPA.
+
 ## 0.5.32
 
 - Add explicit `relativeClockHour` encounter context to Traffic notifications
