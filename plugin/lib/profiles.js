@@ -133,7 +133,7 @@ function normalizeProfileCriteria(profile = {}) {
 
 function normalizeCriteria(value = {}, fallback = {}) {
   const base = {
-    cpa: normalizeCpa(value.cpa, nonNegative(fallback.cpa, 0)),
+    cpa: nonNegative(value.cpa, nonNegative(fallback.cpa, 0)),
     tcpa: nonNegative(value.tcpa, nonNegative(fallback.tcpa, 0)),
     speed: nonNegative(value.speed, nonNegative(fallback.speed, 0)),
   };
@@ -143,30 +143,12 @@ function normalizeCriteria(value = {}, fallback = {}) {
       value.bySize?.[size] || value[size] || fallback.bySize?.[size] || fallback[size] || {};
     const suppliedFallback = fallback.bySize?.[size] || fallback[size] || {};
     bySize[size] = {
-      cpa: normalizeCpa(supplied.cpa, nonNegative(suppliedFallback.cpa, base.cpa)),
+      cpa: nonNegative(supplied.cpa, nonNegative(suppliedFallback.cpa, base.cpa)),
       tcpa: nonNegative(supplied.tcpa, base.tcpa),
       speed: nonNegative(supplied.speed, base.speed),
     };
   }
   return { ...base, bySize };
-}
-
-function normalizeCpa(value, fallback) {
-  const number = Number(value);
-  if (!Number.isFinite(number) || number < 0) return fallback;
-  if (number === 0) return 0;
-
-  // AJRM Marine Display and older AJRM Marine profile editors expose CPA in NM,
-  // while AJRM Marine Traffic evaluates CPA in metres. Accept those NM-shaped values
-  // at the command/config boundary so a saved "1.5 NM" threshold does not
-  // become an unusable "1.5 m" threshold.
-  if (fallback >= METERS_PER_NM && number <= 20) {
-    return number * METERS_PER_NM;
-  }
-  if (fallback > 0 && fallback < METERS_PER_NM && number < 1) {
-    return number * METERS_PER_NM;
-  }
-  return number;
 }
 
 function nonNegative(value, fallback) {

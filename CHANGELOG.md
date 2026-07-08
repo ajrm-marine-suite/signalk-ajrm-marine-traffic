@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.30
+
+- Remove the legacy CPA-threshold unit guessing at the profile command/config
+  boundary. Traffic now treats profile CPA thresholds as metres consistently.
+
 ## 0.5.29
 
 - Raise the default Anchor release speed from 1 knot to 3 knots, so deliberate

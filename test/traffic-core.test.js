@@ -312,9 +312,9 @@ test("profile sensitivity multipliers change Traffic CPA and TCPA evaluation", (
   assert.equal(target.encounter.state, "normal");
 });
 
-test("Display-style NM CPA thresholds are normalized before Traffic evaluation", () => {
+test("profile CPA thresholds are evaluated as metres without unit guessing", () => {
   const state = createTrafficCore({
-    sessionId: "nm-profile-session",
+    sessionId: "metre-profile-session",
     profile: "offshore",
     profileSettings: {
       offshore: {
@@ -322,12 +322,12 @@ test("Display-style NM CPA thresholds are normalized before Traffic evaluation",
         tcpaLookahead: 1,
         danger: {
           bySize: {
-            large: { cpa: 1.5, tcpa: 900, speed: 0 },
+            large: { cpa: 1.5 * 1852, tcpa: 900, speed: 0 },
           },
         },
         warning: {
           bySize: {
-            large: { cpa: 3, tcpa: 1800, speed: 0 },
+            large: { cpa: 3 * 1852, tcpa: 1800, speed: 0 },
           },
         },
       },
