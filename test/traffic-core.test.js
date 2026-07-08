@@ -312,7 +312,7 @@ test("profile sensitivity multipliers change Traffic CPA and TCPA evaluation", (
   assert.equal(target.encounter.state, "normal");
 });
 
-test("profile CPA thresholds are evaluated as metres without unit guessing", () => {
+test("profile CPA thresholds follow the explicit metre contract", () => {
   const state = createTrafficCore({
     sessionId: "metre-profile-session",
     profile: "offshore",

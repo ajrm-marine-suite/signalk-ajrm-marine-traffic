@@ -58,6 +58,9 @@ test("Traffic notifications are standard Signal K values with a compatible envel
   assert.equal(envelope.lifecycle, "active");
   assert.equal(envelope.priority.score, 800);
   assert.equal(envelope.delivery.audio, true);
+  assert.equal(envelope.context.vesselSize, "large");
+  assert.equal(envelope.context.cpaMeters, 125);
+  assert.equal(envelope.context.tcpaSeconds, 180);
 });
 
 test("Traffic encounter messages use bow-relative clock bearing and include overtaking wording", () => {

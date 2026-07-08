@@ -1,9 +1,14 @@
 # Changelog
 
+## 0.5.31
+
+- Add explicit Traffic notification encounter context fields for downstream
+  consumers: vessel size, CPA in metres, and TCPA in seconds.
+
 ## 0.5.30
 
-- Remove the legacy CPA-threshold unit guessing at the profile command/config
-  boundary. Traffic now treats profile CPA thresholds as metres consistently.
+- Make the profile command/config boundary an explicit metre contract for CPA
+  thresholds.
 
 ## 0.5.29
 

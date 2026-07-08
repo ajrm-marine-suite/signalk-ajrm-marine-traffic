@@ -149,6 +149,13 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
             context: {
               mmsi: String(target.mmsi || ""),
               targetContext: String(target.id || ""),
+              vesselSize: String(target.encounter.vesselSize || ""),
+              cpaMeters: Number.isFinite(target.encounter.cpa)
+                ? target.encounter.cpa
+                : null,
+              tcpaSeconds: Number.isFinite(target.encounter.tcpa)
+                ? target.encounter.tcpa
+                : null,
             },
           },
         },

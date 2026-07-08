@@ -2,8 +2,11 @@
 
 Server-side collision and navigation-safety core for the AJRM Marine suite.
 
-Version `0.5.30` removes legacy profile CPA unit guessing. Profile CPA
-thresholds at the Traffic command/config boundary are metres.
+Version `0.5.31` adds explicit encounter context to Traffic notifications:
+vessel size, CPA in metres, and TCPA in seconds.
+
+Version `0.5.30` makes profile CPA thresholds an explicit metre contract at the
+Traffic command/config boundary.
 
 Version `0.5.29` raises the default Anchor release speed to 3 knots and emits a
 profile-selected notification before stationary automute, so deliberately
