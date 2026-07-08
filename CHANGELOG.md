@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.26
+
+- Persist an explicit manual-mute marker so old/stale non-manual mute state can
+  clear when the vessel is moving or the profile leaves Anchor/Harbour, while
+  true manual mute remains absolute.
+
 ## 0.5.25
 
 - Change the head-on collision action prompt from `Head-on:` to `Head-on.`

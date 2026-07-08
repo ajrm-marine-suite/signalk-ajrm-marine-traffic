@@ -75,7 +75,7 @@ function stationaryAutomuteTransition({
 	);
 	if (!automuteAllowed) {
 		const shouldClearAutomaticMute =
-			state.automaticMuteActive === true && settings.muted === true;
+			settings.muted === true && state.manualOverride !== true;
 		return {
 			action: shouldClearAutomaticMute ? { muted: false } : null,
 			state: {
@@ -194,7 +194,13 @@ function transitionDelayMs({ stationary, settings = {} }) {
 
 function automaticMuteAction({ desiredMuted, settings = {}, state = {} }) {
 	if (settings.muted === desiredMuted) return null;
-	if (desiredMuted === false && state.automaticMuteActive !== true) return null;
+	if (
+		desiredMuted === false &&
+		state.automaticMuteActive !== true &&
+		state.manualOverride === true
+	) {
+		return null;
+	}
 	return { muted: desiredMuted };
 }
 

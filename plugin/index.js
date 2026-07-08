@@ -764,6 +764,7 @@ module.exports = function ajrmMarineTraffic(app) {
         profile: state.profile,
         profiles: currentProfiles(),
         muted: audioPolicy.muted,
+        manualMute: audioPolicy.automuteState.manualOverride === true,
         automuteStationary: audioPolicy.automuteStationary,
         automuteStationarySpeed: audioPolicy.automuteStationarySpeed,
         automuteStationaryDelaySeconds: audioPolicy.automuteStationaryDelaySeconds,
@@ -1116,6 +1117,7 @@ function normalizeOptions(value) {
     autoProfile: normalizeAutoProfileOptions(value.autoProfile),
     profiles: normalizeProfileSettings(value.profiles, profile),
     muted: value.muted === true,
+    manualMute: value.manualMute === true,
     automuteStationary: value.automuteStationary !== false,
     automuteStationarySpeed:
       Number.isFinite(Number(value.automuteStationarySpeed)) &&

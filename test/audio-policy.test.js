@@ -127,16 +127,42 @@ test("stationary automute does not announce unmute on first moving sample", () =
   assert.equal(policy.automuteState.automaticMuteActive, false);
 });
 
-test("stationary automute does not release manual mute on first moving sample", () => {
+test("stationary automute releases inherited non-manual mute on first moving sample", () => {
+  const policy = createAudioPolicy({
+    automuteStationary: true,
+    automuteStationarySpeed: 0.35,
+    automuteMovingDelaySeconds: 3,
+    muted: true,
+  });
+
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0.8, { nowMs: 1000 }), null);
+  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0.8, { nowMs: 5000 }), { muted: false });
+  assert.equal(policy.muted, false);
+  assert.equal(policy.automuteState.automaticMuteActive, false);
+});
+
+test("stationary automute does not release explicit manual mute on first moving sample", () => {
+  const policy = createAudioPolicy({
+    automuteStationary: true,
+    automuteStationarySpeed: 0.35,
+  });
+  applyAudioPolicyCommand(policy, { muted: true, ownSog: 0.8 });
+
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0.8), null);
+  assert.equal(policy.muted, true);
+  assert.equal(policy.automuteState.manualOverride, true);
+});
+
+test("stationary automute releases stranded non-manual mute when profile leaves harbour", () => {
   const policy = createAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
     muted: true,
   });
 
-  assert.equal(evaluateAudioPolicy(policy, "harbor", 0.8), null);
-  assert.equal(policy.muted, true);
-  assert.equal(policy.automuteState.automaticMuteActive, false);
+  assert.deepEqual(evaluateAudioPolicy(policy, "coastal", 0.8), { muted: false });
+  assert.equal(policy.muted, false);
+  assert.equal(policy.automuteState.manualOverride, false);
 });
 
 test("stationary automute mutes immediately on first confirmed stationary sample", () => {

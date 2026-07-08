@@ -924,6 +924,7 @@ test("Traffic does not auto-unmute a manual mute on restart while moving", async
   plugin.start({
     automuteStationary: true,
     calculationDelayMs: 0,
+    manualMute: true,
     muted: true,
     profile: "harbor",
   });
@@ -958,6 +959,45 @@ test("Traffic does not auto-unmute a manual mute on restart while moving", async
     ),
     false,
   );
+  plugin.stop();
+});
+
+test("Traffic clears stale non-manual mute on restart while moving", async () => {
+  const fixture = fakeApp();
+  const plugin = createPlugin(fixture.app);
+  plugin.start({
+    automuteMovingDelaySeconds: 0,
+    automuteStationary: true,
+    calculationDelayMs: 0,
+    manualMute: false,
+    muted: true,
+    profile: "harbor",
+  });
+  fixture.deltaHandler({
+    context: fixture.app.selfId,
+    updates: [
+      {
+        timestamp: new Date().toISOString(),
+        values: [
+          {
+            path: "navigation.position",
+            value: { latitude: 56.41, longitude: -5.47 },
+          },
+          { path: "navigation.speedOverGround", value: 2 },
+        ],
+      },
+    ],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 20));
+
+  const values = fixture.messages.flatMap((message) =>
+    message.updates.flatMap((update) => update.values),
+  );
+  const audio = values
+    .filter((value) => value.path === "plugins.ajrmMarineTraffic.audioPolicy")
+    .at(-1).value;
+  assert.equal(audio.muted, false);
+  assert.equal(audio.manualOverride, false);
   plugin.stop();
 });
 

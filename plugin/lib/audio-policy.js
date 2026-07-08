@@ -33,7 +33,10 @@ function createAudioPolicy(options = {}) {
     allWellIntervalMinutes: normalizeAllWellIntervalMinutes(
       options.allWellIntervalMinutes,
     ),
-    automuteState: clearedStationaryAutomuteState(),
+    automuteState: {
+      ...clearedStationaryAutomuteState(),
+      manualOverride: options.manualMute === true,
+    },
     correlationId: null,
     updatedAt: null,
   };
