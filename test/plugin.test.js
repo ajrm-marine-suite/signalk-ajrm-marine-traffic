@@ -1131,6 +1131,73 @@ test("AJRM Marine Traffic accepts safety-affecting commands when enabled", () =>
   plugin.stop();
 });
 
+test("AJRM Marine Traffic announces manual Anchor selection before stationary automute", async () => {
+  const fixture = fakeApp();
+  const plugin = createPlugin(fixture.app);
+  const router = fakeRouter();
+  plugin.registerWithRouter(router);
+  plugin.start({
+    calculationDelayMs: 0,
+    profile: "coastal",
+    automuteStationary: true,
+    automuteStationaryDelaySeconds: 0,
+    automuteMovingDelaySeconds: 0,
+  });
+  fixture.deltaHandler({
+    context: fixture.app.selfId,
+    updates: [
+      {
+        timestamp: new Date().toISOString(),
+        values: [{ path: "navigation.speedOverGround", value: 0 }],
+      },
+    ],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 20));
+
+  const response = invokeRoute(router, "post", "/commands/profile", {
+    body: { profile: "anchor" },
+  });
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.profile, "anchor");
+  await new Promise((resolve) => setTimeout(resolve, 20));
+
+  const values = fixture.messages.flatMap((message) =>
+    message.updates.flatMap((update) => update.values),
+  );
+  const profiles = values
+    .filter((value) => value.path === "plugins.ajrmMarineTraffic.profiles")
+    .map((value) => value.value.current);
+  assert.equal(profiles.at(-1), "anchor");
+  const audio = values
+    .filter((value) => value.path === "plugins.ajrmMarineTraffic.audioPolicy")
+    .at(-1).value;
+  assert.equal(audio.profile, "anchor");
+  assert.equal(audio.automuteAllowed, true);
+  assert.equal(audio.muted, true);
+  assert.equal(audio.automaticMuteActive, true);
+  const systemNotifications = values.filter((value) =>
+    value.path.startsWith("notifications.system.ajrmMarineTraffic."),
+  );
+  const profileIndex = systemNotifications.findIndex(
+    (value) => value.path === "notifications.system.ajrmMarineTraffic.profile-anchor",
+  );
+  const muteIndex = systemNotifications.findIndex(
+    (value) => value.path === "notifications.system.ajrmMarineTraffic.auto-mute",
+  );
+  assert.notEqual(profileIndex, -1);
+  assert.notEqual(muteIndex, -1);
+  assert.ok(profileIndex < muteIndex);
+  assert.equal(
+    systemNotifications[profileIndex].value.message,
+    "Profile manually set to Anchored.",
+  );
+  assert.equal(
+    systemNotifications[muteIndex].value.message,
+    "Sound automatically muted because vessel is stationary.",
+  );
+  plugin.stop();
+});
+
 test("AJRM Marine Traffic exposes in-process audio policy controls", async () => {
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);

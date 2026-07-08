@@ -391,13 +391,15 @@ module.exports = function ajrmMarineTraffic(app) {
     );
   }
 
-  function recalculate() {
+  function recalculate(initialSystemNotifications = []) {
     calculationTimer = null;
     const now = new Date(Date.now()).toISOString();
     const previousOwnPositionFresh =
       projection?.source?.ownVesselPositionFresh === true;
     const suppressReplayWarmupNotifications = state.ajrmMarineLoggerPlaybackWarmup === true;
-    const systemNotifications = suppressReplayWarmupNotifications ? [] : applyPolicies(now);
+    const systemNotifications = suppressReplayWarmupNotifications
+      ? []
+      : [...initialSystemNotifications, ...applyPolicies(now)];
     projection = calculateProjection(state, now);
     const allWellNotification = suppressReplayWarmupNotifications
       ? null
@@ -571,7 +573,7 @@ module.exports = function ajrmMarineTraffic(app) {
           "Auto selection disabled because Harbour was selected outside a known harbour.";
         autoProfileState.lastMessage = "Auto selection OFF.";
       }
-      recalculate();
+      recalculate([manualProfileNotification(profile)]);
       persistOptions();
       debug("traffic.command.profile", {
         sessionId: state.sessionId,
@@ -644,7 +646,7 @@ module.exports = function ajrmMarineTraffic(app) {
         const selected = String(profile || "");
         setProfile(state, selected);
         options.profile = selected;
-        recalculate();
+        recalculate([manualProfileNotification(selected)]);
         persistOptions();
         publish();
         return currentProfiles();
@@ -855,6 +857,20 @@ module.exports = function ajrmMarineTraffic(app) {
     return systemNotifications;
   }
 
+  function manualProfileNotification(profile, now = new Date().toISOString()) {
+    return systemEventNotification(
+      notificationPublisher,
+      {
+        key: `profile-${profile}`,
+        title: "Profile",
+        label: "Profile selected",
+        message: `Profile manually set to ${profileLabel(profile)}.`,
+        category: "profile",
+      },
+      now,
+    );
+  }
+
   function maybeAllWellNotification(now = new Date().toISOString()) {
     const nowMs = Date.parse(now) || Date.now();
     if (audioPolicy.allWellEnabled !== true) {
@@ -1059,7 +1075,7 @@ module.exports = function ajrmMarineTraffic(app) {
 };
 
 function profileLabel(profile) {
-  if (profile === "anchor") return "Anchor";
+  if (profile === "anchor") return "Anchored";
   if (profile === "harbor" || profile === "harbour") return "Harbour";
   if (profile === "coastal") return "Coastal";
   if (profile === "offshore") return "Offshore";

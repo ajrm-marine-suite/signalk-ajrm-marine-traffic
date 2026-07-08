@@ -92,6 +92,31 @@ test("Auto Profile holds Anchor until own vessel exceeds release speed", () => {
   assert.equal(released.state.anchorHeld, false);
 });
 
+test("Auto Profile default Anchor release speed is three knots", () => {
+  const options = normalizeAutoProfileOptions({});
+  assert.equal(options.anchorReleaseSpeed, 3 * 0.514444);
+  const state = createAutoProfileState();
+  const held = evaluateAutoProfile({
+    currentProfile: "anchor",
+    options,
+    ownPosition: null,
+    ownSog: 2.9 * 0.514444,
+    state,
+  });
+  assert.equal(held.profile, "anchor");
+  assert.equal(held.state.anchorHeld, true);
+
+  const released = evaluateAutoProfile({
+    currentProfile: "anchor",
+    options,
+    ownPosition: null,
+    ownSog: 3.1 * 0.514444,
+    state: held.state,
+  });
+  assert.equal(released.profile, "coastal");
+  assert.equal(released.state.anchorHeld, false);
+});
+
 test("Auto Profile falls back to outside profile when harbour regions are unavailable", () => {
   const options = normalizeAutoProfileOptions({
     outsideProfile: "coastal",

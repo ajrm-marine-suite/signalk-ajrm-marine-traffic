@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.29
+
+- Raise the default Anchor release speed from 1 knot to 3 knots, so deliberate
+  anchoring does not immediately fall back to Coastal while the boat settles.
+- Publish a manual profile-selected notification before evaluating stationary
+  automute, so an Anchor selection is followed by the automatic mute event in
+  the event trail.
+
 ## 0.5.28
 
 - Restore Anchor stationary automute as deliberate anchored-profile behaviour,

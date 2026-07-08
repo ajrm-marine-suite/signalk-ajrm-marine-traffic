@@ -8,7 +8,7 @@ const DEFAULT_AUTO_PROFILE_OPTIONS = {
   harbourRegionNamePrefix: "Harbour:",
   harbourProfile: "harbor",
   outsideProfile: "coastal",
-  anchorReleaseSpeed: 0.514444,
+  anchorReleaseSpeed: 3 * 0.514444,
   enterDistanceMeters: 50,
   exitDistanceMeters: 100,
   refreshRegionsSeconds: 60,

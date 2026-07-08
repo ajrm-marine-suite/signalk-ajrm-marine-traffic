@@ -2,6 +2,10 @@
 
 Server-side collision and navigation-safety core for the AJRM Marine suite.
 
+Version `0.5.29` raises the default Anchor release speed to 3 knots and emits a
+profile-selected notification before stationary automute, so deliberately
+selecting Anchor is visible before the "sound automatically muted" event.
+
 Version `0.5.15` adds configurable stationary automute debounce: by default
 Traffic waits 10 seconds before muting after stationary detection and 3 seconds
 before unmuting after motion detection. Unknown speed after GPS loss is kept
