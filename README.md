@@ -28,10 +28,9 @@ messages when the Traffic projection has copied MMSI into the name field.
 Version `0.5.4` keeps MMSI-only vessel identifiers in written encounter
 notifications while publishing a shorter speech-friendly message for Audio.
 
-Version `0.5.3` enables the stationary automute master switch and All's well
-reassurance by default on fresh installs, while preserving explicit off
-settings. Anchor and Harbour default to automute while stationary; Coastal and
-Offshore default to keeping audio enabled.
+Anchor and Harbour profiles default to automute while stationary; Coastal and
+Offshore default to keeping audio enabled. Manual mute is runtime-only and is
+not a persisted Signal K plugin setting.
 
 Status: installable simulator-test AJRM Marine Traffic. It is disabled by default; when
 enabled it is the authoritative AIS traffic provider for target projections,
@@ -219,4 +218,3 @@ Development assistance: OpenAI Codex helped with code generation, refactoring, a
 This software is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). You may use, study, share, and modify it under that licence. If you modify it and make it available to users over a network, the corresponding source code must also be made available under the AGPL.
 
 Commercial licensing is available by arrangement for organisations that want different terms.
-

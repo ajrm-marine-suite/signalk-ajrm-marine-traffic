@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.28
+
+- Restore Anchor stationary automute as deliberate anchored-profile behaviour,
+  while keeping Coastal and Offshore unable to automute.
+- Remove manual mute from the Signal K plugin configuration schema; manual mute
+  remains a runtime-only command and restart still clears saved mute state.
+
 ## 0.5.27
 
 - Treat manual mute as runtime-only: defaults are unmuted, saved mute state is

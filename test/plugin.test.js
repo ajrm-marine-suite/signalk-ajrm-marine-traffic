@@ -14,6 +14,7 @@ test("installable AJRM Marine Traffic is disabled by default and authoritative w
   assert.equal(packageInfo["signalk-plugin-enabled-by-default"], false);
   const plugin = createPlugin(fakeApp().app);
   assert.equal(plugin.schema.properties.mode, undefined);
+  assert.equal(plugin.schema.properties.muted, undefined);
 });
 
 test("AJRM Marine Traffic materializes first-run default settings once enabled", () => {
@@ -29,7 +30,7 @@ test("AJRM Marine Traffic materializes first-run default settings once enabled",
   assert.equal(fixture.savedOptions.allWellEnabled, true);
   assert.equal(fixture.savedOptions.muted, false);
   assert.equal(fixture.savedOptions.manualMute, false);
-  assert.equal(fixture.savedOptions.profiles.anchor.automuteStationary, false);
+  assert.equal(fixture.savedOptions.profiles.anchor.automuteStationary, true);
   assert.equal(fixture.savedOptions.profiles.coastal.automuteStationary, false);
   plugin.stop();
 });

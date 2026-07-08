@@ -12,12 +12,14 @@ const {
 } = require("../plugin/lib/audio-policy");
 const { normalizeProfileSettings } = require("../plugin/lib/profiles");
 
-test("stationary automute is limited to Harbour profile", () => {
+test("stationary automute is limited to Anchor and Harbour profiles", () => {
   const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
   });
-  assert.equal(evaluateAudioPolicy(policy, "anchor", 0), null);
+  assert.deepEqual(evaluateAudioPolicy(policy, "anchor", 0), { muted: true });
+  assert.equal(policy.muted, true);
+  assert.deepEqual(evaluateAudioPolicy(policy, "anchor", 0.8), { muted: false });
   assert.equal(policy.muted, false);
   assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0), { muted: true });
   assert.equal(policy.muted, true);
@@ -28,7 +30,7 @@ test("stationary automute is limited to Harbour profile", () => {
 test("profile settings default stationary automute by sailing profile", () => {
   const profiles = normalizeProfileSettings();
 
-  assert.equal(profiles.anchor.automuteStationary, false);
+  assert.equal(profiles.anchor.automuteStationary, true);
   assert.equal(profiles.harbor.automuteStationary, true);
   assert.equal(profiles.coastal.automuteStationary, false);
   assert.equal(profiles.offshore.automuteStationary, false);
@@ -46,9 +48,14 @@ test("stationary automute follows per-profile settings", () => {
     offshore: { automuteStationary: false },
   };
 
-  assert.equal(
+  assert.deepEqual(
     evaluateAudioPolicy(policy, "anchor", 0, { profileSettings }),
-    null,
+    { muted: true },
+  );
+  assert.equal(policy.muted, true);
+  assert.deepEqual(
+    evaluateAudioPolicy(policy, "anchor", 0.8, { profileSettings }),
+    { muted: false },
   );
   assert.equal(policy.muted, false);
   assert.equal(evaluateAudioPolicy(policy, "coastal", 0, { profileSettings }), null);

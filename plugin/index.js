@@ -174,14 +174,11 @@ module.exports = function ajrmMarineTraffic(app) {
           },
         },
       },
-      muted: {
-        type: "boolean",
-        title: "Mute all AJRM Marine audio",
-        default: false,
-      },
       automuteStationary: {
         type: "boolean",
-        title: "Enable stationary automute master switch",
+        title: "Enable Anchor/Harbour stationary automute master switch",
+        description:
+          "Manual mute is a runtime control only. Stationary automute is only honoured in Anchor and Harbour profiles.",
         default: true,
       },
       automuteStationarySpeed: {
