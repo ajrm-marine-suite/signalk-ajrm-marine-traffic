@@ -12,11 +12,13 @@ const {
 } = require("../plugin/lib/audio-policy");
 const { normalizeProfileSettings } = require("../plugin/lib/profiles");
 
-test("stationary automute is limited to Anchor and Harbour profiles", () => {
+test("stationary automute is limited to Harbour profile", () => {
   const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
   });
+  assert.equal(evaluateAudioPolicy(policy, "anchor", 0), null);
+  assert.equal(policy.muted, false);
   assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0), { muted: true });
   assert.equal(policy.muted, true);
   assert.deepEqual(evaluateAudioPolicy(policy, "coastal", 0), { muted: false });
@@ -26,7 +28,7 @@ test("stationary automute is limited to Anchor and Harbour profiles", () => {
 test("profile settings default stationary automute by sailing profile", () => {
   const profiles = normalizeProfileSettings();
 
-  assert.equal(profiles.anchor.automuteStationary, true);
+  assert.equal(profiles.anchor.automuteStationary, false);
   assert.equal(profiles.harbor.automuteStationary, true);
   assert.equal(profiles.coastal.automuteStationary, false);
   assert.equal(profiles.offshore.automuteStationary, false);
@@ -38,7 +40,7 @@ test("stationary automute follows per-profile settings", () => {
     automuteStationarySpeed: 0.35,
   });
   const profileSettings = {
-    anchor: { automuteStationary: false },
+    anchor: { automuteStationary: true },
     harbor: { automuteStationary: true },
     coastal: { automuteStationary: true },
     offshore: { automuteStationary: false },
@@ -49,10 +51,8 @@ test("stationary automute follows per-profile settings", () => {
     null,
   );
   assert.equal(policy.muted, false);
-  assert.deepEqual(evaluateAudioPolicy(policy, "coastal", 0, { profileSettings }), {
-    muted: true,
-  });
-  assert.equal(policy.muted, true);
+  assert.equal(evaluateAudioPolicy(policy, "coastal", 0, { profileSettings }), null);
+  assert.equal(policy.muted, false);
 });
 
 test("stationary automute releases on movement after the configured delay", () => {
@@ -85,15 +85,17 @@ test("stationary automute releases on speed through water when GPS SOG is unavai
   assert.equal(policy.muted, false);
 });
 
-test("stationary automute adopts inherited stationary mute after restart", () => {
+test("stationary automute ignores saved mute on restart", () => {
   const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
+    manualMute: true,
     muted: true,
   });
 
-  assert.equal(evaluateAudioPolicy(policy, "harbor", 0), null);
-  assert.equal(policy.muted, true);
+  assert.equal(policy.muted, false);
+  assert.equal(policy.automuteState.manualOverride, false);
+  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0), { muted: true });
   assert.equal(policy.automuteState.automaticMuteActive, true);
   assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0.8), {
     muted: false,
@@ -101,19 +103,17 @@ test("stationary automute adopts inherited stationary mute after restart", () =>
   assert.equal(policy.muted, false);
 });
 
-test("stationary automute releases inherited mute when profile leaves harbour", () => {
+test("stationary automute ignores saved mute when profile is not harbour", () => {
   const policy = createImmediateAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
+    manualMute: true,
     muted: true,
   });
 
-  assert.equal(evaluateAudioPolicy(policy, "harbor", 0), null);
-  assert.equal(policy.automuteState.automaticMuteActive, true);
-  assert.deepEqual(evaluateAudioPolicy(policy, "coastal", 0.8), {
-    muted: false,
-  });
+  assert.equal(evaluateAudioPolicy(policy, "coastal", 0.8), null);
   assert.equal(policy.muted, false);
+  assert.equal(policy.automuteState.manualOverride, false);
 });
 
 test("stationary automute does not announce unmute on first moving sample", () => {
@@ -127,18 +127,20 @@ test("stationary automute does not announce unmute on first moving sample", () =
   assert.equal(policy.automuteState.automaticMuteActive, false);
 });
 
-test("stationary automute releases inherited non-manual mute on first moving sample", () => {
+test("stationary automute starts unmuted when saved mute is present and vessel is moving", () => {
   const policy = createAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
     automuteMovingDelaySeconds: 3,
+    manualMute: true,
     muted: true,
   });
 
   assert.equal(evaluateAudioPolicy(policy, "harbor", 0.8, { nowMs: 1000 }), null);
-  assert.deepEqual(evaluateAudioPolicy(policy, "harbor", 0.8, { nowMs: 5000 }), { muted: false });
+  assert.equal(evaluateAudioPolicy(policy, "harbor", 0.8, { nowMs: 5000 }), null);
   assert.equal(policy.muted, false);
   assert.equal(policy.automuteState.automaticMuteActive, false);
+  assert.equal(policy.automuteState.manualOverride, false);
 });
 
 test("stationary automute does not release explicit manual mute on first moving sample", () => {
@@ -153,14 +155,14 @@ test("stationary automute does not release explicit manual mute on first moving 
   assert.equal(policy.automuteState.manualOverride, true);
 });
 
-test("stationary automute releases stranded non-manual mute when profile leaves harbour", () => {
+test("stationary automute ignores stranded saved mute when profile leaves harbour", () => {
   const policy = createAudioPolicy({
     automuteStationary: true,
     automuteStationarySpeed: 0.35,
     muted: true,
   });
 
-  assert.deepEqual(evaluateAudioPolicy(policy, "coastal", 0.8), { muted: false });
+  assert.equal(evaluateAudioPolicy(policy, "coastal", 0.8), null);
   assert.equal(policy.muted, false);
   assert.equal(policy.automuteState.manualOverride, false);
 });
@@ -220,7 +222,7 @@ test("Audio Policy projection carries session, sequence and correlation", () => 
   assert.equal(projection.sequence, 4);
   assert.equal(projection.correlationId, "mute-transition");
   assert.equal(projection.authoritative, true);
-  assert.equal(projection.muted, true);
+  assert.equal(projection.muted, false);
   assert.equal(projection.allWellEnabled, true);
   assert.equal(projection.allWellMessage, "Still looking good.");
   assert.equal(projection.allWellIntervalMinutes, 45);

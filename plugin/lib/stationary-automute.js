@@ -4,11 +4,12 @@ const DEFAULT_STATIONARY_AUTOMUTE_STABLE_SAMPLES = 3;
 
 function stationaryAutomuteProfileAllowed(profile, profileSettings = {}) {
 	const profileName = profile === "harbour" ? "harbor" : profile;
+	if (profileName !== "harbor") return false;
 	const profilePolicy = profileSettings?.[profileName];
 	if (typeof profilePolicy?.automuteStationary === "boolean") {
 		return profilePolicy.automuteStationary;
 	}
-	return profile === "anchor" || profile === "harbor" || profile === "harbour";
+	return true;
 }
 
 function stationaryAutomuteStationaryState({

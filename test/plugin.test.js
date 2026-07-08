@@ -28,7 +28,8 @@ test("AJRM Marine Traffic materializes first-run default settings once enabled",
   assert.equal(fixture.savedOptions.automuteStationary, true);
   assert.equal(fixture.savedOptions.allWellEnabled, true);
   assert.equal(fixture.savedOptions.muted, false);
-  assert.equal(fixture.savedOptions.profiles.anchor.automuteStationary, true);
+  assert.equal(fixture.savedOptions.manualMute, false);
+  assert.equal(fixture.savedOptions.profiles.anchor.automuteStationary, false);
   assert.equal(fixture.savedOptions.profiles.coastal.automuteStationary, false);
   plugin.stop();
 });
@@ -918,7 +919,7 @@ test("Traffic does not announce auto-unmute on first moving sample", async () =>
   plugin.stop();
 });
 
-test("Traffic does not auto-unmute a manual mute on restart while moving", async () => {
+test("Traffic resets manual mute on restart while moving", async () => {
   const fixture = fakeApp();
   const plugin = createPlugin(fixture.app);
   plugin.start({
@@ -951,7 +952,8 @@ test("Traffic does not auto-unmute a manual mute on restart while moving", async
   const audio = values
     .filter((value) => value.path === "plugins.ajrmMarineTraffic.audioPolicy")
     .at(-1).value;
-  assert.equal(audio.muted, true);
+  assert.equal(audio.muted, false);
+  assert.equal(audio.manualOverride, false);
   assert.equal(
     values.some(
       (value) =>
@@ -1135,11 +1137,13 @@ test("AJRM Marine Traffic exposes in-process audio policy controls", async () =>
 
   assert.equal(typeof fixture.app.ajrmMarineTrafficApi.status, "function");
   assert.equal(typeof fixture.app.ajrmMarineTrafficApi.setAudioPolicy, "function");
-  assert.equal(fixture.app.ajrmMarineTrafficApi.status().audioPolicy.muted, true);
+  assert.equal(fixture.app.ajrmMarineTrafficApi.status().audioPolicy.muted, false);
 
-  const audio = await fixture.app.ajrmMarineTrafficApi.setAudioPolicy({ muted: false });
-  assert.equal(audio.muted, false);
+  const audio = await fixture.app.ajrmMarineTrafficApi.setAudioPolicy({ muted: true });
+  assert.equal(audio.muted, true);
+  assert.equal(audio.manualOverride, true);
   assert.equal(fixture.savedOptions.muted, false);
+  assert.equal(fixture.savedOptions.manualMute, false);
 
   plugin.stop();
   assert.equal(fixture.app.ajrmMarineTrafficApi, undefined);

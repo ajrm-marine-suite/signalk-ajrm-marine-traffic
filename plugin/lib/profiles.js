@@ -4,7 +4,7 @@ const { METERS_PER_NM } = require("./navigation");
 
 const PROFILES = {
   anchor: {
-    automuteStationary: true,
+    automuteStationary: false,
     warning: { cpa: 0, tcpa: 3600, speed: 0 },
     danger: { cpa: 0, tcpa: 3600, speed: 0 },
   },

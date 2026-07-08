@@ -17,7 +17,7 @@ const DEFAULT_ALL_WELL_INTERVAL_MINUTES = 30;
 
 function createAudioPolicy(options = {}) {
   return {
-    muted: options.muted === true,
+    muted: false,
     automuteStationary: options.automuteStationary !== false,
     automuteStationarySpeed: normalizeSpeed(options.automuteStationarySpeed),
     automuteStationaryDelaySeconds: normalizeDelaySeconds(
@@ -35,7 +35,7 @@ function createAudioPolicy(options = {}) {
     ),
     automuteState: {
       ...clearedStationaryAutomuteState(),
-      manualOverride: options.manualMute === true,
+      manualOverride: false,
     },
     correlationId: null,
     updatedAt: null,

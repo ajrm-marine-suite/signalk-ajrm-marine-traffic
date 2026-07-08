@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.27
+
+- Treat manual mute as runtime-only: defaults are unmuted, saved mute state is
+  ignored on server restart, and persisted options are written back unmuted.
+- Limit stationary automute to Harbour profile only; Anchor, Coastal, and
+  Offshore profiles do not automute even if stale settings request it.
+
 ## 0.5.26
 
 - Persist an explicit manual-mute marker so old/stale non-manual mute state can
