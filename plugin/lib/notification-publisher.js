@@ -150,6 +150,9 @@ function reconcileNotifications(runtime, projection, now = new Date().toISOStrin
               mmsi: String(target.mmsi || ""),
               targetContext: String(target.id || ""),
               vesselSize: String(target.encounter.vesselSize || ""),
+              relativeClockHour: Number.isFinite(target.encounter.bearingRelative)
+                ? clockPosition(target.encounter.bearingRelative)
+                : null,
               cpaMeters: Number.isFinite(target.encounter.cpa)
                 ? target.encounter.cpa
                 : null,

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.32
+
+- Add explicit `relativeClockHour` encounter context to Traffic notifications
+  so downstream audio clients do not parse clock position from spoken text.
+
 ## 0.5.31
 
 - Add explicit Traffic notification encounter context fields for downstream
